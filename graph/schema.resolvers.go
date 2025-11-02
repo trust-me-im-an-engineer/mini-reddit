@@ -136,7 +136,11 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.Create
 		return nil, InternalServerErr
 	}
 
-	return converter.Comment_DomainToModel(domainComment), nil
+	modelComment := converter.Comment_DomainToModel(domainComment)
+
+	r.subscriptionService.PublishComment(domainInput.PostID, modelComment)
+
+	return modelComment, nil
 }
 
 // UpdateComment is the resolver for the updateComment field.
@@ -254,7 +258,21 @@ func (r *queryResolver) Comment(ctx context.Context, id string) (*model.Comment,
 
 // NewComment is the resolver for the newComment field.
 func (r *subscriptionResolver) NewComment(ctx context.Context, postID string) (<-chan *model.Comment, error) {
-	panic(fmt.Errorf("not implemented: NewComment - newComment"))
+	domainPostID, err := strconv.Atoi(postID)
+	if err != nil {
+		return nil, invalidInputWrap(errs.InvalidIDErr)
+	}
+
+	ch := make(chan *model.Comment, 10)
+
+	r.subscriptionService.SubscribeToPost(domainPostID, ch)
+	go func() {
+		<-ctx.Done()
+		r.subscriptionService.UnsubscribeFromPost(domainPostID, ch)
+		slog.Debug("subscription closed", "postID", domainPostID)
+	}()
+
+	return ch, nil
 }
 
 // Comment returns CommentResolver implementation.
