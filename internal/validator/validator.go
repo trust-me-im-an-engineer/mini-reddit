@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	MaxTitleLen   = 200
-	MaxContentLen = 20000
-	MaxCommentLen = 2000
+	MaxTitleLen         = 200
+	MaxContentLen       = 20000
+	MaxCommentLen       = 2000
+	MaxPageLimit  int32 = 100
 )
 
 var (
@@ -23,6 +24,10 @@ var (
 	InvalidVoteValueErr = errors.New("vote value must be 1 or -1")
 	EmptyCommentErr     = errors.New("comment cannot be empty")
 	TooLongCommentErr   = errors.New("comment cannot be longer than " + strconv.Itoa(MaxCommentLen) + " characters")
+	NilSortOrder        = errors.New("sort order cannot be nil")
+	NilLimit            = errors.New("limit cannot be nil")
+	NegativeLimit       = errors.New("limit must be positive")
+	TooBigPostLimit     = errors.New("post limit cannot be longer than " + strconv.Itoa(int(MaxPageLimit)))
 )
 
 func ValidateCreatePostInput(in model.CreatePostInput) error {
@@ -54,7 +59,7 @@ func validateContent(content string) error {
 
 func ValidateUpdatePostInput(in model.UpdatePostInput) error {
 	if _, err := strconv.Atoi(in.ID); err != nil {
-		return errs.InvalidIDErr
+		return errs.InvalidID
 	}
 
 	if in.Title == nil && in.Content == nil {
@@ -77,7 +82,7 @@ func ValidateUpdatePostInput(in model.UpdatePostInput) error {
 
 func ValidateVoteInput(in model.VoteInput) error {
 	if _, err := strconv.Atoi(in.ID); err != nil {
-		return errs.InvalidIDErr
+		return errs.InvalidID
 	}
 	if in.Value != 1 && in.Value != -1 {
 		return InvalidVoteValueErr
@@ -97,14 +102,14 @@ func validateCommentText(text string) error {
 
 func ValidateCreateCommentInput(in model.CreateCommentInput) error {
 	if _, err := strconv.Atoi(in.PostID); err != nil {
-		return errs.InvalidIDErr
+		return errs.InvalidID
 	}
 	if err := validateCommentText(in.Text); err != nil {
 		return err
 	}
 	if in.ParentID != nil {
 		if _, err := strconv.Atoi(*in.ParentID); err != nil {
-			return errs.InvalidIDErr
+			return errs.InvalidID
 		}
 	}
 	return nil
@@ -112,7 +117,23 @@ func ValidateCreateCommentInput(in model.CreateCommentInput) error {
 
 func ValidateUpdateCommentInput(in model.UpdateCommentInput) error {
 	if _, err := strconv.Atoi(in.ID); err != nil {
-		return errs.InvalidIDErr
+		return errs.InvalidID
 	}
 	return validateCommentText(in.Text)
+}
+
+func ValidatePosts(sort *model.SortOrder, limit *int32, cursor *string) error {
+	if sort == nil {
+		return NilSortOrder
+	}
+	if limit == nil {
+		return NilLimit
+	}
+	if *limit < 0 {
+		return NegativeLimit
+	}
+	if *limit > MaxPageLimit {
+		return TooBigPostLimit
+	}
+	return nil
 }

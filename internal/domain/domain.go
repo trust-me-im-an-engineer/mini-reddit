@@ -7,6 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	SortOrderRating string = "RATING"
+	SortOrderNew    string = "NEW"
+	SortOrderOld    string = "OLD"
+)
+
 type Post struct {
 	ID                 int       `db:"id"`
 	AuthorID           uuid.UUID `db:"author_id"`

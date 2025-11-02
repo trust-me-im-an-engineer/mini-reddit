@@ -65,7 +65,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePos
 func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return false, invalidInputWrap(errs.InvalidIDErr)
+		return false, invalidInputWrap(errs.InvalidID)
 	}
 
 	err = r.postService.DeletePost(ctx, domainID)
@@ -170,7 +170,7 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input model.Update
 func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (bool, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return false, invalidInputWrap(errs.InvalidIDErr)
+		return false, invalidInputWrap(errs.InvalidID)
 	}
 
 	err = r.commentService.DeleteComment(ctx, domainID)
@@ -220,7 +220,7 @@ func (r *postResolver) Comments(ctx context.Context, obj *model.Post, sort *mode
 func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, invalidInputWrap(errs.InvalidIDErr)
+		return nil, invalidInputWrap(errs.InvalidID)
 	}
 
 	internalPost, err := r.postService.GetPost(ctx, domainID)
@@ -234,14 +234,29 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 
 // Posts is the resolver for the posts field.
 func (r *queryResolver) Posts(ctx context.Context, sort *model.SortOrder, limit *int32, cursor *string) (*model.PostConnection, error) {
-	panic(fmt.Errorf("not implemented: Posts - posts"))
+	if err := validator.ValidatePosts(sort, limit, cursor); err != nil {
+		return nil, invalidInputWrap(err)
+	}
+
+	domainSort := string(*sort)
+
+	domainPosts, c, hasNext, err := r.postService.GetPosts(ctx, domainSort, *limit, cursor)
+	if errors.Is(err, errs.InvalidCursor) {
+		return nil, errs.InvalidCursor
+	}
+	if err != nil {
+		slog.Error("post service failed to get posts", "sort", domainSort, "limit", *limit, "cursor", cursor, "error", err)
+		return nil, InternalServerErr
+	}
+
+	return converter.DomainPostsToModelPostConnection(domainPosts, hasNext, c), nil
 }
 
 // Comment is the resolver for the comment field.
 func (r *queryResolver) Comment(ctx context.Context, id string) (*model.Comment, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, invalidInputWrap(errs.InvalidIDErr)
+		return nil, invalidInputWrap(errs.InvalidID)
 	}
 
 	internalComment, err := r.commentService.GetComment(ctx, domainID)
@@ -260,7 +275,7 @@ func (r *queryResolver) Comment(ctx context.Context, id string) (*model.Comment,
 func (r *subscriptionResolver) NewComment(ctx context.Context, postID string) (<-chan *model.Comment, error) {
 	domainPostID, err := strconv.Atoi(postID)
 	if err != nil {
-		return nil, invalidInputWrap(errs.InvalidIDErr)
+		return nil, invalidInputWrap(errs.InvalidID)
 	}
 
 	ch := make(chan *model.Comment, 10)

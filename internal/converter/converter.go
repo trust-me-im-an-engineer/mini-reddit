@@ -65,9 +65,9 @@ func CreateCommentInput_ModelToDomain(m *model.CreateCommentInput) *domain.Creat
 
 func Comment_DomainToModel(d *domain.Comment) *model.Comment {
 	m := &model.Comment{
-		ID:       strconv.Itoa(d.ID),
-		PostID:   strconv.Itoa(d.PostID),
-		AuthorID: d.AuthorID,
+		ID:        strconv.Itoa(d.ID),
+		PostID:    strconv.Itoa(d.PostID),
+		AuthorID:  d.AuthorID,
 		CreatedAt: d.CreatedAt,
 		Rating:    d.Rating,
 		ParentID:  nil,
@@ -94,6 +94,23 @@ func ModelVoteInputToDomainCommentVote(m *model.VoteInput) *domain.CommentVote {
 		Vote: domain.Vote{
 			VoterID: m.VoterID,
 			Value:   int8(m.Value),
+		},
+	}
+}
+
+func DomainPostsToModelPostConnection(posts []*domain.Post, hasNext bool, cursor string) *model.PostConnection {
+	edges := make([]*model.PostEdge, len(posts))
+	for i, post := range posts {
+		edges[i] = &model.PostEdge{
+			Node: Post_DomainToModel(post),
+		}
+	}
+
+	return &model.PostConnection{
+		Edges: edges,
+		PageInfo: &model.PageInfo{
+			HasNextPage: hasNext,
+			EndCursor:   &cursor,
 		},
 	}
 }
