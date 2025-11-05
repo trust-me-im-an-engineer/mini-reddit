@@ -51,25 +51,25 @@ type Vote struct {
 }
 
 type CreatePostInput struct {
-	AuthorID uuid.UUID `json:"authorID"`
-	Title    string    `json:"title"`
-	Content  string    `json:"content"`
+	AuthorID uuid.UUID
+	Title    string
+	Content  string
 }
 
 type UpdatePostInput struct {
-	ID      int     `json:"id"`
-	Title   *string `json:"title,omitempty"`
-	Content *string `json:"content,omitempty"`
+	ID      int
+	Title   *string
+	Content *string
 }
 
 type CreateCommentInput struct {
-	PostID   int       `json:"postID"`
-	AuthorID uuid.UUID `json:"authorID"`
-	Text     string    `json:"text"`
-	ParentID *int      `json:"parentID,omitempty"`
+	PostID   int
+	AuthorID uuid.UUID
+	Text     string
+	ParentID *int
 }
 
 type UpdateCommentInput struct {
-	ID   int    `json:"id"`
-	Text string `json:"text"`
+	ID   int
+	Text string
 }
