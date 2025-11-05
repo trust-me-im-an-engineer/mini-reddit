@@ -98,27 +98,32 @@ func ModelVoteInputToDomainCommentVote(m *model.VoteInput) *domain.CommentVote {
 	}
 }
 
-func DomainPostsToModelPostConnection(posts []*domain.Post, hasNext bool, cursor string) *model.PostConnection {
-	edges := make([]*model.PostEdge, len(posts))
-	for i, post := range posts {
+func PostConnection_DomainToModel(d *domain.PostConnection) *model.PostConnection {
+	edges := make([]*model.PostEdge, len(d.Edges))
+	for i, e := range d.Edges {
 		edges[i] = &model.PostEdge{
-			Node: Post_DomainToModel(post),
+			Cursor: *e.Cursor,
+			Node:   Post_DomainToModel(e.Post),
 		}
 	}
 
 	return &model.PostConnection{
-		Edges: edges,
-		PageInfo: &model.PageInfo{
-			HasNextPage: hasNext,
-			EndCursor:   &cursor,
-		},
+		Edges:    edges,
+		PageInfo: pageInfo_DomainToModel(d.PageInfo),
 	}
 }
 
-func PostsQuery(sort model.SortOrder, limit int32, cursor *string) *domain.PostsQuery {
-	return &domain.PostsQuery{
+func PostsInput(sort model.SortOrder, limit int32, cursor *string) *domain.PostsInput {
+	return &domain.PostsInput{
 		Sort:   domain.SortOrder(sort),
 		Limit:  limit,
 		Cursor: cursor,
+	}
+}
+
+func pageInfo_DomainToModel(d *domain.PageInfo) *model.PageInfo {
+	return &model.PageInfo{
+		HasNextPage: d.HasNext,
+		EndCursor:   d.EndCursor,
 	}
 }

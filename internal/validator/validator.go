@@ -120,7 +120,7 @@ func ValidateUpdateCommentInput(in model.UpdateCommentInput) error {
 	return validateCommentText(in.Text)
 }
 
-func ValidatePosts(sort model.SortOrder, limit int32, cursor *string) error {
+func ValidatePostsInput(sort model.SortOrder, limit int32, cursor *string) error {
 	if limit < 0 {
 		return NegativeLimit
 	}

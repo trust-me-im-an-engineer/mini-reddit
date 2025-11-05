@@ -75,8 +75,38 @@ type UpdateCommentInput struct {
 	Text string
 }
 
-type PostsQuery struct {
+type PostsInput struct {
 	Sort   SortOrder
 	Limit  int32
 	Cursor *string
+}
+
+type PageInfo struct {
+	HasNext   bool
+	EndCursor *string
+}
+
+type PostEdge struct {
+	Cursor *string
+	Post   *Post
+}
+
+type PostConnection struct {
+	Edges    []*PostEdge
+	PageInfo *PageInfo
+}
+
+type PostTimeCursor struct {
+	Time time.Time
+	ID   int
+}
+
+type PostRatingCursor struct {
+	Rating int32
+	ID     int
+}
+
+type PostsPage struct {
+	Posts   []*Post
+	HasNext bool
 }

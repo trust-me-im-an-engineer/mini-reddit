@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/trust-me-im-an-engineer/comments/internal/domain"
 )
 
 // EncodeTimeID is a convenience helper.
@@ -14,48 +16,56 @@ func EncodeTimeID(t time.Time, id int) string {
 }
 
 // DecodeTimeID decodes a time|id cursor.
-func DecodeTimeID(s string) (time.Time, int, error) {
+func DecodeTimeID(s string) (*domain.PostTimeCursor, error) {
 	parts, err := decodeParts(s)
 	if err != nil {
-		return time.Time{}, 0, err
+		return nil, err
 	}
 	if len(parts) != 2 {
-		return time.Time{}, 0, err
+		return nil, err
 	}
 
 	t, err := time.Parse(time.RFC3339Nano, parts[0])
 	if err != nil {
-		return time.Time{}, 0, err
+		return nil, err
 	}
 	id, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return time.Time{}, 0, err
+		return nil, err
 	}
-	return t, id, nil
+	cursor := &domain.PostTimeCursor{
+		Time: t,
+		ID:   id,
+	}
+	return cursor, nil
 }
 
 func EncodeRatingID(rating int32, id int) string {
 	return encodeParts(rating, id)
 }
 
-func DecodeRatingID(s string) (rating int32, id int, err error) {
+func DecodeRatingID(s string) (*domain.PostRatingCursor, error) {
 	parts, err := decodeParts(s)
 	if err != nil {
-		return 0, 0, err
+		return nil, err
 	}
 	if len(parts) != 2 {
-		return 0, 0, err
+		return nil, err
 	}
 
 	r, err := strconv.Atoi(parts[0])
 	if err != nil {
-		return 0, 0, err
+		return nil, err
 	}
-	id, err = strconv.Atoi(parts[1])
+	id, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return 0, 0, err
+		return nil, err
 	}
-	return int32(r), id, nil
+	cursor := &domain.PostRatingCursor{
+		Rating: int32(r),
+		ID:     id,
+	}
+	return cursor, nil
 }
 
 // encodeParts encodes arbitrary values as base64("val1|val2|...")

@@ -232,22 +232,22 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 
 // Posts is the resolver for the posts field.
 func (r *queryResolver) Posts(ctx context.Context, sort model.SortOrder, limit int32, cursor *string) (*model.PostConnection, error) {
-	if err := validator.ValidatePosts(sort, limit, cursor); err != nil {
+	if err := validator.ValidatePostsInput(sort, limit, cursor); err != nil {
 		return nil, invalidInputWrap(err)
 	}
 
-	query := converter.PostsQuery(sort, limit, cursor)
+	domainInput := converter.PostsInput(sort, limit, cursor)
 
-	domainPosts, c, hasNext, err := r.postService.GetPosts(ctx, query)
+	domainPostConnection, err := r.postService.GetPosts(ctx, domainInput)
 	if errors.Is(err, errs.InvalidCursor) {
 		return nil, errs.InvalidCursor
 	}
 	if err != nil {
-		slog.Error("post service failed to get posts", "sort", query.Sort, "limit", query.Limit, "cursor", cursor, "error", err)
+		slog.Error("post service failed to get posts", "sort", domainInput.Sort, "limit", domainInput.Limit, "cursor", cursor, "error", err)
 		return nil, InternalServerErr
 	}
 
-	return converter.DomainPostsToModelPostConnection(domainPosts, hasNext, c), nil
+	return converter.PostConnection_DomainToModel(domainPostConnection), nil
 }
 
 // Comment is the resolver for the comment field.

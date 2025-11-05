@@ -15,52 +15,87 @@ type Service struct {
 	storage storage.Storage
 }
 
-func (s *Service) GetPosts(ctx context.Context, q *domain.PostsQuery) (posts []*domain.Post, nextCursor string, hasNext bool, err error) {
+func (s *Service) GetPosts(ctx context.Context, q *domain.PostsInput) (*domain.PostConnection, error) {
+	edges := make([]*domain.PostEdge, 0, q.Limit)
+	var postsPage *domain.PostsPage
 
-	var newFirst bool
 	switch q.Sort {
 	case domain.SortOrderRating:
+		var cursor *domain.PostRatingCursor
 		if q.Cursor != nil {
-			rating, id, err := cursorcode.DecodeRatingID(*q.Cursor)
+			c, err := cursorcode.DecodeRatingID(*q.Cursor)
 			if err != nil {
-				return nil, "", false, errs.InvalidCursor
+				return nil, errs.InvalidCursor
 			}
-			posts, hasNext, err = s.storage.GetPostsRatingCursor(ctx, q.Limit, rating, id)
-		} else {
-			posts, hasNext, err = s.storage.GetPostsRating(ctx, q.Limit)
+			cursor = c
 		}
+
+		pp, err := s.storage.GetPostsSortedByRating(ctx, q.Limit, cursor)
 		if err != nil {
-			return nil, "", false, fmt.Errorf("storage error: %w", err)
+			return nil, fmt.Errorf("storage failed to get posts sorted by rating: %w", err)
 		}
+
+		for _, p := range pp.Posts {
+			cursor := cursorcode.EncodeRatingID(p.Rating, p.ID)
+			edge := &domain.PostEdge{
+				Cursor: &cursor,
+				Post:   p,
+			}
+			edges = append(edges, edge)
+		}
+
+		postsPage = pp
 
 	case domain.SortOrderNew, domain.SortOrderOld:
-		newFirst = q.Sort == domain.SortOrderNew
+		var cursor *domain.PostTimeCursor
 		if q.Cursor != nil {
-			t, id, err := cursorcode.DecodeTimeID(*q.Cursor)
+			c, err := cursorcode.DecodeTimeID(*q.Cursor)
 			if err != nil {
-				return nil, "", false, errs.InvalidCursor
+				return nil, errs.InvalidCursor
 			}
-			posts, hasNext, err = s.storage.GetPostsTimeCursor(ctx, q.Limit, t, id, newFirst)
-		} else {
-			posts, hasNext, err = s.storage.GetPostsTime(ctx, q.Limit, newFirst)
+			cursor = c
 		}
+
+		newFirst := q.Sort == domain.SortOrderNew
+		pp, err := s.storage.GetPostsSortedByTime(ctx, q.Limit, cursor, newFirst)
 		if err != nil {
-			return nil, "", false, fmt.Errorf("storage error: %w", err)
+			return nil, fmt.Errorf("storage failed to get posts sorted by time: %w", err)
 		}
+
+		for _, p := range pp.Posts {
+			cursor := cursorcode.EncodeTimeID(p.CreatedAt, p.ID)
+			edge := &domain.PostEdge{
+				Cursor: &cursor,
+				Post:   p,
+			}
+			edges = append(edges, edge)
+		}
+
+		postsPage = pp
 	}
 
-	if len(posts) == 0 {
-		return []*domain.Post{}, "", false, nil
+	connection := &domain.PostConnection{
+		Edges: edges,
+		PageInfo: &domain.PageInfo{
+			HasNext:   postsPage.HasNext,
+			EndCursor: nil,
+		},
 	}
 
-	last := posts[len(posts)-1]
+	if len(edges) == 0 {
+		return connection, nil
+	}
+
+	last := postsPage.Posts[len(postsPage.Posts)-1]
+	var endCursor string
 	if q.Sort == domain.SortOrderRating {
-		nextCursor = cursorcode.EncodeRatingID(last.Rating, last.ID)
+		endCursor = cursorcode.EncodeRatingID(last.Rating, last.ID)
 	} else {
-		nextCursor = cursorcode.EncodeTimeID(last.CreatedAt, last.ID)
+		endCursor = cursorcode.EncodeTimeID(last.CreatedAt, last.ID)
 	}
+	connection.PageInfo.EndCursor = &endCursor
 
-	return posts, nextCursor, hasNext, nil
+	return connection, nil
 }
 
 func NewService(storage storage.Storage) *Service {
