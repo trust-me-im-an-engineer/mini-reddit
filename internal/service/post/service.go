@@ -15,34 +15,34 @@ type Service struct {
 	storage storage.Storage
 }
 
-func (s *Service) GetPosts(ctx context.Context, sort domain.SortOrder, limit int32, cursor *string) (posts []*domain.Post, nextCursor string, hasNext bool, err error) {
+func (s *Service) GetPosts(ctx context.Context, q *domain.PostsQuery) (posts []*domain.Post, nextCursor string, hasNext bool, err error) {
 
 	var newFirst bool
-	switch sort {
+	switch q.Sort {
 	case domain.SortOrderRating:
-		if cursor != nil {
-			rating, id, err := cursorcode.DecodeRatingID(*cursor)
+		if q.Cursor != nil {
+			rating, id, err := cursorcode.DecodeRatingID(*q.Cursor)
 			if err != nil {
 				return nil, "", false, errs.InvalidCursor
 			}
-			posts, hasNext, err = s.storage.GetPostsRatingCursor(ctx, limit, rating, id)
+			posts, hasNext, err = s.storage.GetPostsRatingCursor(ctx, q.Limit, rating, id)
 		} else {
-			posts, hasNext, err = s.storage.GetPostsRating(ctx, limit)
+			posts, hasNext, err = s.storage.GetPostsRating(ctx, q.Limit)
 		}
 		if err != nil {
 			return nil, "", false, fmt.Errorf("storage error: %w", err)
 		}
 
 	case domain.SortOrderNew, domain.SortOrderOld:
-		newFirst = sort == domain.SortOrderNew
-		if cursor != nil {
-			t, id, err := cursorcode.DecodeTimeID(*cursor)
+		newFirst = q.Sort == domain.SortOrderNew
+		if q.Cursor != nil {
+			t, id, err := cursorcode.DecodeTimeID(*q.Cursor)
 			if err != nil {
 				return nil, "", false, errs.InvalidCursor
 			}
-			posts, hasNext, err = s.storage.GetPostsTimeCursor(ctx, limit, t, id, newFirst)
+			posts, hasNext, err = s.storage.GetPostsTimeCursor(ctx, q.Limit, t, id, newFirst)
 		} else {
-			posts, hasNext, err = s.storage.GetPostsTime(ctx, limit, newFirst)
+			posts, hasNext, err = s.storage.GetPostsTime(ctx, q.Limit, newFirst)
 		}
 		if err != nil {
 			return nil, "", false, fmt.Errorf("storage error: %w", err)
@@ -54,7 +54,7 @@ func (s *Service) GetPosts(ctx context.Context, sort domain.SortOrder, limit int
 	}
 
 	last := posts[len(posts)-1]
-	if sort == domain.SortOrderRating {
+	if q.Sort == domain.SortOrderRating {
 		nextCursor = cursorcode.EncodeRatingID(last.Rating, last.ID)
 	} else {
 		nextCursor = cursorcode.EncodeTimeID(last.CreatedAt, last.ID)

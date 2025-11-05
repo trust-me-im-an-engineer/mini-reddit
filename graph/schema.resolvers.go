@@ -234,22 +234,21 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 
 // Posts is the resolver for the posts field.
 func (r *queryResolver) Posts(ctx context.Context, sort *model.SortOrder, limit *int32, cursor *string) (*model.PostConnection, error) {
-	if err := validator.ValidatePosts(sort, limit, cursor); err != nil {
-		return nil, invalidInputWrap(err)
-	}
+	// if err := validator.ValidatePosts(sort, limit, cursor); err != nil {
+	// 	return nil, invalidInputWrap(err)
+	// }
 
-	domainSort := string(*sort)
+	// domainPosts, c, hasNext, err := r.postService.GetPosts(ctx, domainSort, *limit, cursor)
+	// if errors.Is(err, errs.InvalidCursor) {
+	// 	return nil, errs.InvalidCursor
+	// }
+	// if err != nil {
+	// 	slog.Error("post service failed to get posts", "sort", domainSort, "limit", *limit, "cursor", cursor, "error", err)
+	// 	return nil, InternalServerErr
+	// }
 
-	domainPosts, c, hasNext, err := r.postService.GetPosts(ctx, domainSort, *limit, cursor)
-	if errors.Is(err, errs.InvalidCursor) {
-		return nil, errs.InvalidCursor
-	}
-	if err != nil {
-		slog.Error("post service failed to get posts", "sort", domainSort, "limit", *limit, "cursor", cursor, "error", err)
-		return nil, InternalServerErr
-	}
-
-	return converter.DomainPostsToModelPostConnection(domainPosts, hasNext, c), nil
+	// return converter.DomainPostsToModelPostConnection(domainPosts, hasNext, c), nil
+	panic("sadfasdfsf")
 }
 
 // Comment is the resolver for the comment field.

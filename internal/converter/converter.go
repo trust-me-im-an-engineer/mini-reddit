@@ -40,8 +40,8 @@ func UpdatePost_ModelToDomain(m *model.UpdatePostInput) *domain.UpdatePostInput 
 func ModelVoteInputToDomainPostVote(m *model.VoteInput) *domain.PostVote {
 	id, _ := strconv.Atoi(m.ID) // id already validated
 	return &domain.PostVote{
-		PostID: id,
 		Vote: domain.Vote{
+			ID:      id,
 			VoterID: m.VoterID,
 			Value:   int8(m.Value),
 		},
@@ -90,8 +90,8 @@ func UpdateCommentInput_ModelToDomain(m *model.UpdateCommentInput) *domain.Updat
 func ModelVoteInputToDomainCommentVote(m *model.VoteInput) *domain.CommentVote {
 	id, _ := strconv.Atoi(m.ID) // id already validated
 	return &domain.CommentVote{
-		CommentID: id,
 		Vote: domain.Vote{
+			ID:      id,
 			VoterID: m.VoterID,
 			Value:   int8(m.Value),
 		},
@@ -113,4 +113,17 @@ func DomainPostsToModelPostConnection(posts []*domain.Post, hasNext bool, cursor
 			EndCursor:   &cursor,
 		},
 	}
+}
+
+func PostsQuery(sort *model.SortOrder, limit *int32, cursor *string) *domain.PostsQuery {
+	return &domain.PostsQuery{
+		Sort:   *SortOrder_ModelToDomain(sort),
+		Limit:  0,
+		Cursor: cursor,
+	}
+}
+
+func SortOrder_ModelToDomain(m *model.SortOrder) *domain.SortOrder {
+	d := domain.SortOrder(*m)
+	return &d
 }

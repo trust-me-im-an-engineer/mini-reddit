@@ -37,16 +37,15 @@ type Comment struct {
 }
 
 type PostVote struct {
-	PostID int `db:"post_id"`
 	Vote
 }
 
 type CommentVote struct {
-	CommentID int `db:"comment_id"`
 	Vote
 }
 
 type Vote struct {
+	ID      int       `db:"id"`
 	VoterID uuid.UUID `db:"voter_id"`
 	// +1 for upvote, -1 for downvote
 	Value int8 `db:"value"`
@@ -76,7 +75,7 @@ type UpdateCommentInput struct {
 	Text string
 }
 
-type GetPostsInput struct {
+type PostsQuery struct {
 	Sort   SortOrder
 	Limit  int32
 	Cursor *string
