@@ -15,7 +15,9 @@ type Service struct {
 	storage storage.Storage
 }
 
-func (s *Service) GetPosts(ctx context.Context, sort string, limit int32, cursor *string) (posts []*domain.Post, nextCursor string, hasNext bool, err error) {
+func (s *Service) GetPosts(ctx context.Context, sort domain.SortOrder, limit int32, cursor *string) (posts []*domain.Post, nextCursor string, hasNext bool, err error) {
+
+	var newFirst bool
 	switch sort {
 	case domain.SortOrderRating:
 		if cursor != nil {
@@ -23,41 +25,39 @@ func (s *Service) GetPosts(ctx context.Context, sort string, limit int32, cursor
 			if err != nil {
 				return nil, "", false, errs.InvalidCursor
 			}
-
 			posts, hasNext, err = s.storage.GetPostsRatingCursor(ctx, limit, rating, id)
-			if err != nil {
-				return nil, "", false, fmt.Errorf("storage failed to get posts by rating with cursor: %w", err)
-			}
 		} else {
-			var err error
 			posts, hasNext, err = s.storage.GetPostsRating(ctx, limit)
-			if err != nil {
-				return nil, "", false, fmt.Errorf("storage failed to get posts by rating: %w", err)
-			}
 		}
-		lastPost := posts[len(posts)-1]
-		nextCursor = cursorcode.EncodeRatingID(lastPost.Rating, lastPost.ID)
+		if err != nil {
+			return nil, "", false, fmt.Errorf("storage error: %w", err)
+		}
 
 	case domain.SortOrderNew, domain.SortOrderOld:
+		newFirst = sort == domain.SortOrderNew
 		if cursor != nil {
 			t, id, err := cursorcode.DecodeTimeID(*cursor)
 			if err != nil {
 				return nil, "", false, errs.InvalidCursor
 			}
-
-			posts, hasNext, err = s.storage.GetPostsTimeCursor(ctx, limit, t, id, true)
-			if err != nil {
-				return nil, "", false, fmt.Errorf("storage failed to get posts by time with cursor: %w", err)
-			}
+			posts, hasNext, err = s.storage.GetPostsTimeCursor(ctx, limit, t, id, newFirst)
 		} else {
-			var err error
-			posts, hasNext, err = s.storage.GetPostsTime(ctx, limit, true)
-			if err != nil {
-				return nil, "", false, fmt.Errorf("storage failed to get posts by time: %w", err)
-			}
+			posts, hasNext, err = s.storage.GetPostsTime(ctx, limit, newFirst)
 		}
-		lastPost := posts[len(posts)-1]
-		nextCursor = cursorcode.EncodeTimeID(lastPost.CreatedAt, lastPost.ID)
+		if err != nil {
+			return nil, "", false, fmt.Errorf("storage error: %w", err)
+		}
+	}
+
+	if len(posts) == 0 {
+		return []*domain.Post{}, "", false, nil
+	}
+
+	last := posts[len(posts)-1]
+	if sort == domain.SortOrderRating {
+		nextCursor = cursorcode.EncodeRatingID(last.Rating, last.ID)
+	} else {
+		nextCursor = cursorcode.EncodeTimeID(last.CreatedAt, last.ID)
 	}
 
 	return posts, nextCursor, hasNext, nil

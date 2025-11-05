@@ -7,10 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type SortOrder string
+
 const (
-	SortOrderRating string = "RATING"
-	SortOrderNew    string = "NEW"
-	SortOrderOld    string = "OLD"
+	SortOrderRating SortOrder = "RATING"
+	SortOrderNew    SortOrder = "NEW"
+	SortOrderOld    SortOrder = "OLD"
 )
 
 type Post struct {
@@ -72,4 +74,10 @@ type CreateCommentInput struct {
 type UpdateCommentInput struct {
 	ID   int
 	Text string
+}
+
+type GetPostsInput struct {
+	Sort   SortOrder
+	Limit  int32
+	Cursor *string
 }
