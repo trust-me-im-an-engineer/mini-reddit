@@ -31,7 +31,7 @@ type Post {
   rating: Int!
   commentsCount: Int!
   commentsRestricted: Boolean!
-  comments(sort: SortOrder = RATING, limit: Int = 6, cursor: String, depth: Int = 2): CommentConnection!  @goField(forceResolver: true)
+  comments(sort: SortOrder! = RATING, limit: Int! = 6, cursor: String, depth: Int! = 2): CommentConnection!  @goField(forceResolver: true)
 }
 
 input CreatePostInput {
@@ -65,7 +65,7 @@ type Comment {
   rating: Int!
   deleted: Boolean!
   parentID: ID
-  children(sort: SortOrder = RATING, limit: Int = 6, cursor: String, depth: Int = 2): CommentConnection! @goField(forceResolver: true)
+  children(sort: SortOrder! = RATING, limit: Int! = 6, cursor: String, depth: Int! = 2): CommentConnection! @goField(forceResolver: true)
   parentTree(depth: Int = 1): [Comment!]!
 }
 
@@ -105,7 +105,7 @@ type Mutation {
 
 type Query {
   post(id: ID!): Post
-  posts(sort: SortOrder = NEW, limit: Int = 10, cursor: String): PostConnection!
+  posts(sort: SortOrder! = NEW, limit: Int! = 10, cursor: String): PostConnection!
   comment(id: ID!): Comment
 }
 

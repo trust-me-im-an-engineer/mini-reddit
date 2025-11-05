@@ -54,7 +54,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Comment struct {
 		AuthorID   func(childComplexity int) int
-		Children   func(childComplexity int, sort *model.SortOrder, limit *int32, cursor *string, depth *int32) int
+		Children   func(childComplexity int, sort model.SortOrder, limit int32, cursor *string, depth int32) int
 		CreatedAt  func(childComplexity int) int
 		Deleted    func(childComplexity int) int
 		ID         func(childComplexity int) int
@@ -94,7 +94,7 @@ type ComplexityRoot struct {
 
 	Post struct {
 		AuthorID           func(childComplexity int) int
-		Comments           func(childComplexity int, sort *model.SortOrder, limit *int32, cursor *string, depth *int32) int
+		Comments           func(childComplexity int, sort model.SortOrder, limit int32, cursor *string, depth int32) int
 		CommentsCount      func(childComplexity int) int
 		CommentsRestricted func(childComplexity int) int
 		Content            func(childComplexity int) int
@@ -117,7 +117,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Comment func(childComplexity int, id string) int
 		Post    func(childComplexity int, id string) int
-		Posts   func(childComplexity int, sort *model.SortOrder, limit *int32, cursor *string) int
+		Posts   func(childComplexity int, sort model.SortOrder, limit int32, cursor *string) int
 	}
 
 	Subscription struct {
@@ -126,7 +126,7 @@ type ComplexityRoot struct {
 }
 
 type CommentResolver interface {
-	Children(ctx context.Context, obj *model.Comment, sort *model.SortOrder, limit *int32, cursor *string, depth *int32) (*model.CommentConnection, error)
+	Children(ctx context.Context, obj *model.Comment, sort model.SortOrder, limit int32, cursor *string, depth int32) (*model.CommentConnection, error)
 }
 type MutationResolver interface {
 	CreatePost(ctx context.Context, input model.CreatePostInput) (*model.Post, error)
@@ -140,11 +140,11 @@ type MutationResolver interface {
 	VoteComment(ctx context.Context, input model.VoteInput) (*model.Comment, error)
 }
 type PostResolver interface {
-	Comments(ctx context.Context, obj *model.Post, sort *model.SortOrder, limit *int32, cursor *string, depth *int32) (*model.CommentConnection, error)
+	Comments(ctx context.Context, obj *model.Post, sort model.SortOrder, limit int32, cursor *string, depth int32) (*model.CommentConnection, error)
 }
 type QueryResolver interface {
 	Post(ctx context.Context, id string) (*model.Post, error)
-	Posts(ctx context.Context, sort *model.SortOrder, limit *int32, cursor *string) (*model.PostConnection, error)
+	Posts(ctx context.Context, sort model.SortOrder, limit int32, cursor *string) (*model.PostConnection, error)
 	Comment(ctx context.Context, id string) (*model.Comment, error)
 }
 type SubscriptionResolver interface {
@@ -186,7 +186,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Comment.Children(childComplexity, args["sort"].(*model.SortOrder), args["limit"].(*int32), args["cursor"].(*string), args["depth"].(*int32)), true
+		return e.complexity.Comment.Children(childComplexity, args["sort"].(model.SortOrder), args["limit"].(int32), args["cursor"].(*string), args["depth"].(int32)), true
 	case "Comment.createdAt":
 		if e.complexity.Comment.CreatedAt == nil {
 			break
@@ -396,7 +396,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Post.Comments(childComplexity, args["sort"].(*model.SortOrder), args["limit"].(*int32), args["cursor"].(*string), args["depth"].(*int32)), true
+		return e.complexity.Post.Comments(childComplexity, args["sort"].(model.SortOrder), args["limit"].(int32), args["cursor"].(*string), args["depth"].(int32)), true
 	case "Post.commentsCount":
 		if e.complexity.Post.CommentsCount == nil {
 			break
@@ -498,7 +498,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Posts(childComplexity, args["sort"].(*model.SortOrder), args["limit"].(*int32), args["cursor"].(*string)), true
+		return e.complexity.Query.Posts(childComplexity, args["sort"].(model.SortOrder), args["limit"].(int32), args["cursor"].(*string)), true
 
 	case "Subscription.newComment":
 		if e.complexity.Subscription.NewComment == nil {
@@ -661,12 +661,12 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Comment_children_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sort", ec.unmarshalOSortOrder2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sort", ec.unmarshalNSortOrder2githubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["sort"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
@@ -676,7 +676,7 @@ func (ec *executionContext) field_Comment_children_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["cursor"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "depth", ec.unmarshalOInt2ᚖint32)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "depth", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
@@ -802,12 +802,12 @@ func (ec *executionContext) field_Mutation_votePost_args(ctx context.Context, ra
 func (ec *executionContext) field_Post_comments_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sort", ec.unmarshalOSortOrder2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sort", ec.unmarshalNSortOrder2githubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["sort"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
@@ -817,7 +817,7 @@ func (ec *executionContext) field_Post_comments_args(ctx context.Context, rawArg
 		return nil, err
 	}
 	args["cursor"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "depth", ec.unmarshalOInt2ᚖint32)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "depth", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
@@ -861,12 +861,12 @@ func (ec *executionContext) field_Query_post_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_posts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sort", ec.unmarshalOSortOrder2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sort", ec.unmarshalNSortOrder2githubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["sort"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
@@ -1182,7 +1182,7 @@ func (ec *executionContext) _Comment_children(ctx context.Context, field graphql
 		ec.fieldContext_Comment_children,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Comment().Children(ctx, obj, fc.Args["sort"].(*model.SortOrder), fc.Args["limit"].(*int32), fc.Args["cursor"].(*string), fc.Args["depth"].(*int32))
+			return ec.resolvers.Comment().Children(ctx, obj, fc.Args["sort"].(model.SortOrder), fc.Args["limit"].(int32), fc.Args["cursor"].(*string), fc.Args["depth"].(int32))
 		},
 		nil,
 		ec.marshalNCommentConnection2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐCommentConnection,
@@ -2246,7 +2246,7 @@ func (ec *executionContext) _Post_comments(ctx context.Context, field graphql.Co
 		ec.fieldContext_Post_comments,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Post().Comments(ctx, obj, fc.Args["sort"].(*model.SortOrder), fc.Args["limit"].(*int32), fc.Args["cursor"].(*string), fc.Args["depth"].(*int32))
+			return ec.resolvers.Post().Comments(ctx, obj, fc.Args["sort"].(model.SortOrder), fc.Args["limit"].(int32), fc.Args["cursor"].(*string), fc.Args["depth"].(int32))
 		},
 		nil,
 		ec.marshalNCommentConnection2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐCommentConnection,
@@ -2502,7 +2502,7 @@ func (ec *executionContext) _Query_posts(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_posts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Posts(ctx, fc.Args["sort"].(*model.SortOrder), fc.Args["limit"].(*int32), fc.Args["cursor"].(*string))
+			return ec.resolvers.Query().Posts(ctx, fc.Args["sort"].(model.SortOrder), fc.Args["limit"].(int32), fc.Args["cursor"].(*string))
 		},
 		nil,
 		ec.marshalNPostConnection2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐPostConnection,
@@ -5719,6 +5719,16 @@ func (ec *executionContext) marshalNPostEdge2ᚖgithubᚗcomᚋtrustᚑmeᚑim�
 	return ec._PostEdge(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNSortOrder2githubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder(ctx context.Context, v any) (model.SortOrder, error) {
+	var res model.SortOrder
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSortOrder2githubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder(ctx context.Context, sel ast.SelectionSet, v model.SortOrder) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6113,22 +6123,6 @@ func (ec *executionContext) marshalOPost2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑan�
 		return graphql.Null
 	}
 	return ec._Post(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOSortOrder2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder(ctx context.Context, v any) (*model.SortOrder, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(model.SortOrder)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOSortOrder2ᚖgithubᚗcomᚋtrustᚑmeᚑimᚑanᚑengineerᚋcommentsᚋgraphᚋmodelᚐSortOrder(ctx context.Context, sel ast.SelectionSet, v *model.SortOrder) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

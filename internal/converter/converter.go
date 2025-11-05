@@ -115,15 +115,10 @@ func DomainPostsToModelPostConnection(posts []*domain.Post, hasNext bool, cursor
 	}
 }
 
-func PostsQuery(sort *model.SortOrder, limit *int32, cursor *string) *domain.PostsQuery {
+func PostsQuery(sort model.SortOrder, limit int32, cursor *string) *domain.PostsQuery {
 	return &domain.PostsQuery{
-		Sort:   *SortOrder_ModelToDomain(sort),
-		Limit:  0,
+		Sort:   domain.SortOrder(sort),
+		Limit:  limit,
 		Cursor: cursor,
 	}
-}
-
-func SortOrder_ModelToDomain(m *model.SortOrder) *domain.SortOrder {
-	d := domain.SortOrder(*m)
-	return &d
 }

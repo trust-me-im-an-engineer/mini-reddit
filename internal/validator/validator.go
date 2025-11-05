@@ -24,8 +24,6 @@ var (
 	InvalidVoteValueErr = errors.New("vote value must be 1 or -1")
 	EmptyCommentErr     = errors.New("comment cannot be empty")
 	TooLongCommentErr   = errors.New("comment cannot be longer than " + strconv.Itoa(MaxCommentLen) + " characters")
-	NilSortOrder        = errors.New("sort order cannot be nil")
-	NilLimit            = errors.New("limit cannot be nil")
 	NegativeLimit       = errors.New("limit must be positive")
 	TooBigPostLimit     = errors.New("post limit cannot be longer than " + strconv.Itoa(int(MaxPageLimit)))
 )
@@ -122,17 +120,11 @@ func ValidateUpdateCommentInput(in model.UpdateCommentInput) error {
 	return validateCommentText(in.Text)
 }
 
-func ValidatePosts(sort *model.SortOrder, limit *int32, cursor *string) error {
-	if sort == nil {
-		return NilSortOrder
-	}
-	if limit == nil {
-		return NilLimit
-	}
-	if *limit < 0 {
+func ValidatePosts(sort model.SortOrder, limit int32, cursor *string) error {
+	if limit < 0 {
 		return NegativeLimit
 	}
-	if *limit > MaxPageLimit {
+	if limit > MaxPageLimit {
 		return TooBigPostLimit
 	}
 	return nil

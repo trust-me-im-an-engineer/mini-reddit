@@ -17,10 +17,8 @@ import (
 	"github.com/trust-me-im-an-engineer/comments/internal/validator"
 )
 
-var InternalServerErr = errors.New("internal server error")
-
 // Children is the resolver for the children field.
-func (r *commentResolver) Children(ctx context.Context, obj *model.Comment, sort *model.SortOrder, limit *int32, cursor *string, depth *int32) (*model.CommentConnection, error) {
+func (r *commentResolver) Children(ctx context.Context, obj *model.Comment, sort model.SortOrder, limit int32, cursor *string, depth int32) (*model.CommentConnection, error) {
 	panic(fmt.Errorf("not implemented: Children - children"))
 }
 
@@ -212,7 +210,7 @@ func (r *mutationResolver) VoteComment(ctx context.Context, input model.VoteInpu
 }
 
 // Comments is the resolver for the comments field.
-func (r *postResolver) Comments(ctx context.Context, obj *model.Post, sort *model.SortOrder, limit *int32, cursor *string, depth *int32) (*model.CommentConnection, error) {
+func (r *postResolver) Comments(ctx context.Context, obj *model.Post, sort model.SortOrder, limit int32, cursor *string, depth int32) (*model.CommentConnection, error) {
 	panic(fmt.Errorf("not implemented: Comments - comments"))
 }
 
@@ -233,22 +231,23 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 }
 
 // Posts is the resolver for the posts field.
-func (r *queryResolver) Posts(ctx context.Context, sort *model.SortOrder, limit *int32, cursor *string) (*model.PostConnection, error) {
-	// if err := validator.ValidatePosts(sort, limit, cursor); err != nil {
-	// 	return nil, invalidInputWrap(err)
-	// }
+func (r *queryResolver) Posts(ctx context.Context, sort model.SortOrder, limit int32, cursor *string) (*model.PostConnection, error) {
+	if err := validator.ValidatePosts(sort, limit, cursor); err != nil {
+		return nil, invalidInputWrap(err)
+	}
 
-	// domainPosts, c, hasNext, err := r.postService.GetPosts(ctx, domainSort, *limit, cursor)
-	// if errors.Is(err, errs.InvalidCursor) {
-	// 	return nil, errs.InvalidCursor
-	// }
-	// if err != nil {
-	// 	slog.Error("post service failed to get posts", "sort", domainSort, "limit", *limit, "cursor", cursor, "error", err)
-	// 	return nil, InternalServerErr
-	// }
+	query := converter.PostsQuery(sort, limit, cursor)
 
-	// return converter.DomainPostsToModelPostConnection(domainPosts, hasNext, c), nil
-	panic("sadfasdfsf")
+	domainPosts, c, hasNext, err := r.postService.GetPosts(ctx, query)
+	if errors.Is(err, errs.InvalidCursor) {
+		return nil, errs.InvalidCursor
+	}
+	if err != nil {
+		slog.Error("post service failed to get posts", "sort", query.Sort, "limit", query.Limit, "cursor", cursor, "error", err)
+		return nil, InternalServerErr
+	}
+
+	return converter.DomainPostsToModelPostConnection(domainPosts, hasNext, c), nil
 }
 
 // Comment is the resolver for the comment field.
@@ -309,6 +308,8 @@ type mutationResolver struct{ *Resolver }
 type postResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
+
+var InternalServerErr = errors.New("internal server error")
 
 func invalidInputWrap(err error) error {
 	return fmt.Errorf("Invalid input: %w", err)
