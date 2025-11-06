@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/errs"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
 )
 
@@ -69,7 +70,7 @@ func (s *InMemory) GetPost(ctx context.Context, id int) (*domain.Post, error) {
 
 	post, ok := s.posts[id]
 	if !ok {
-		return nil, fmt.Errorf("post with id %d not found", id)
+		return nil, errs.PostNotFound // Updated
 	}
 	// Return a copy to prevent external modification without lock
 	postCopy := *post
@@ -82,7 +83,7 @@ func (s *InMemory) UpdatePost(ctx context.Context, input *domain.UpdatePostInput
 
 	post, ok := s.posts[input.ID]
 	if !ok {
-		return nil, fmt.Errorf("post with id %d not found", input.ID)
+		return nil, errs.PostNotFound // Updated
 	}
 
 	if input.Title != nil {
@@ -101,7 +102,7 @@ func (s *InMemory) DeletePost(ctx context.Context, id int) error {
 	defer s.mu.Unlock()
 
 	if _, ok := s.posts[id]; !ok {
-		return fmt.Errorf("post with id %d not found", id)
+		return errs.PostNotFound // Updated
 	}
 	delete(s.posts, id)
 	delete(s.postVotes, id)
@@ -116,7 +117,7 @@ func (s *InMemory) SetCommentsRestricted(ctx context.Context, id int, restricted
 
 	post, ok := s.posts[id]
 	if !ok {
-		return nil, fmt.Errorf("post with id %d not found", id)
+		return nil, errs.PostNotFound // Updated
 	}
 	post.CommentsRestricted = restricted
 	postCopy := *post
@@ -129,7 +130,7 @@ func (s *InMemory) VotePost(ctx context.Context, vote *domain.PostVote) (*domain
 
 	post, ok := s.posts[vote.ID]
 	if !ok {
-		return nil, fmt.Errorf("post with id %d not found", vote.ID)
+		return nil, errs.PostNotFound // Updated
 	}
 
 	votesMap := s.postVotes[vote.ID]
@@ -145,15 +146,9 @@ func (s *InMemory) VotePost(ctx context.Context, vote *domain.PostVote) (*domain
 			delete(votesMap, vote.VoterID)
 			ratingChange = -int32(vote.Value)
 		} else {
-			// Change vote: change from +1 to -1 or vice versa
-			// The change is new_value - current_value (e.g., -1 - (+1) = -2 or +1 - (-1) = +2)
-			currentVote.Value = vote.Value
-			ratingChange = int32(vote.Value) - int32(currentVote.Value) // This is wrong, should be new - old: +1 - (-1) = 2, -1 - (+1) = -2
-			// Wait, let's simplify. When changing vote: The current vote is cancelled (-current.Value) and the new vote is applied (+new.Value).
-			// Example: +1 vote. New vote is -1. Change: -1 - 1 = -2.
-			// Example: -1 vote. New vote is +1. Change: +1 - (-1) = +2.
-			// Example: +1 vote. New vote is +1. Change: 0 (handled above by unvote)
+			// Change vote: The change is new_value - current_value (e.g., -1 - (+1) = -2 or +1 - (-1) = +2)
 			ratingChange = int32(vote.Value) - int32(currentVote.Value)
+			currentVote.Value = vote.Value
 			// Re-assign vote in map to be safe
 			votesMap[vote.VoterID] = currentVote
 		}
@@ -269,10 +264,21 @@ func (s *InMemory) CreateComment(ctx context.Context, input *domain.CreateCommen
 
 	post, ok := s.posts[input.PostID]
 	if !ok {
-		return nil, fmt.Errorf("post with id %d not found", input.PostID)
+		return nil, errs.PostNotFound // Updated
 	}
 	if post.CommentsRestricted {
 		return nil, fmt.Errorf("comments are restricted for post %d", input.PostID)
+	}
+
+	// Check parent comment if ParentID is set
+	if input.ParentID != nil {
+		parentComment, ok := s.comments[*input.ParentID]
+		if !ok {
+			return nil, errs.CommentNotFound // Parent comment not found (uses the generic CommentNotFound)
+		}
+		if parentComment.Text == nil {
+			return nil, errs.ParentCommentDeleted // Updated
+		}
 	}
 
 	now := time.Now().UTC()
@@ -301,10 +307,10 @@ func (s *InMemory) UpdateCommentIfNotDeleted(ctx context.Context, input *domain.
 
 	comment, ok := s.comments[input.ID]
 	if !ok {
-		return nil, fmt.Errorf("comment with id %d not found", input.ID)
+		return nil, errs.CommentNotFound // Updated
 	}
 	if comment.Text == nil {
-		return nil, fmt.Errorf("comment with id %d is already deleted", input.ID)
+		return nil, errs.CommentDeleted // Updated
 	}
 
 	newText := input.Text
@@ -319,7 +325,7 @@ func (s *InMemory) DeleteComment(ctx context.Context, id int) error {
 
 	comment, ok := s.comments[id]
 	if !ok {
-		return fmt.Errorf("comment with id %d not found", id)
+		return errs.CommentNotFound // Updated
 	}
 
 	if comment.Text != nil {
@@ -342,10 +348,10 @@ func (s *InMemory) VoteCommentIfNotDeleted(ctx context.Context, vote *domain.Com
 
 	comment, ok := s.comments[vote.ID]
 	if !ok {
-		return nil, fmt.Errorf("comment with id %d not found", vote.ID)
+		return nil, errs.CommentNotFound // Updated
 	}
 	if comment.Text == nil {
-		return nil, fmt.Errorf("comment with id %d is deleted and cannot be voted", vote.ID)
+		return nil, errs.CommentDeleted // Updated
 	}
 
 	votesMap := s.commentVotes[vote.ID]
@@ -381,7 +387,7 @@ func (s *InMemory) GetComment(ctx context.Context, id int) (*domain.Comment, err
 
 	comment, ok := s.comments[id]
 	if !ok {
-		return nil, fmt.Errorf("comment with id %d not found", id)
+		return nil, errs.CommentNotFound // Updated
 	}
 	commentCopy := *comment
 	return &commentCopy, nil
