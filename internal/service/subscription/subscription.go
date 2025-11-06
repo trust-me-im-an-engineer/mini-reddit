@@ -12,7 +12,7 @@ type Service struct {
 	mu          sync.RWMutex
 }
 
-func NewSubscriptionService() *Service {
+func NewService() *Service {
 	return &Service{
 		Subscribers: make(map[int]map[chan *model.Comment]struct{}),
 	}

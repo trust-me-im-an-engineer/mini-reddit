@@ -3,17 +3,15 @@ package config
 import (
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/caarlos0/env/v6"
 )
 
 type Config struct {
-	Address         string        `env:"APP_ADDRESS" envDefault:"0.0.0.0:8080"`
-	LogLevel        slog.Level    `env:"APP_LOG_LEVEL" envDefault:"INFO"`
-	ShutdownTimeout time.Duration `env:"APP_SHUTDOWN_TIMEOUT" envDefault:"10s"`
-	StorageType     string        `env:"STORAGE_TYPE" envDefault:"INMEMORY"`
-	DB              *DBConfig
+	LogLevel    slog.Level `env:"APP_LOG_LEVEL" envDefault:"INFO"`
+	Address     string     `env:"APP_ADDRESS" envDefault:"0.0.0.0:8080"`
+	StorageType string     `env:"STORAGE_TYPE" envDefault:"INMEMORY"`
+	DB          *DBConfig
 }
 
 type DBConfig struct {
