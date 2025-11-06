@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/trust-me-im-an-engineer/comments/internal/domain"
-	"github.com/trust-me-im-an-engineer/comments/internal/storage"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
 )
 
 type Service struct {

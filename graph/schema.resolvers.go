@@ -11,10 +11,10 @@ import (
 	"log/slog"
 	"strconv"
 
-	"github.com/trust-me-im-an-engineer/comments/graph/model"
-	"github.com/trust-me-im-an-engineer/comments/internal/converter"
-	"github.com/trust-me-im-an-engineer/comments/internal/errs"
-	"github.com/trust-me-im-an-engineer/comments/internal/validator"
+	"github.com/trust-me-im-an-engineer/mini-reddit/graph/model"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/converter"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/errs"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/validator"
 )
 
 // Children is the resolver for the children field.

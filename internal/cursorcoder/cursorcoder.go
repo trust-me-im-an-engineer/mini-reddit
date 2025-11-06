@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/trust-me-im-an-engineer/comments/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
 )
 
 // EncodeTimeID is a convenience helper.

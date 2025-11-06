@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 
-	"github.com/trust-me-im-an-engineer/comments/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
 )
 
 type Storage interface {

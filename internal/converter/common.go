@@ -1,8 +1,8 @@
 package converter
 
 import (
-	"github.com/trust-me-im-an-engineer/comments/graph/model"
-	"github.com/trust-me-im-an-engineer/comments/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/graph/model"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
 )
 
 func pageInfo_DomainToModel(d *domain.PageInfo) *model.PageInfo {

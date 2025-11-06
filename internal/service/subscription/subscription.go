@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/trust-me-im-an-engineer/comments/graph/model"
+	"github.com/trust-me-im-an-engineer/mini-reddit/graph/model"
 )
 
 type Service struct {

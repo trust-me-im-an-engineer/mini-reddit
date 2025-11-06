@@ -3,8 +3,8 @@ package converter
 import (
 	"strconv"
 
-	"github.com/trust-me-im-an-engineer/comments/graph/model"
-	"github.com/trust-me-im-an-engineer/comments/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/graph/model"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
 )
 
 func Post_DomainToModel(d *domain.Post) *model.Post {

@@ -1,9 +1,9 @@
 package graph
 
 import (
-	"github.com/trust-me-im-an-engineer/comments/internal/service/comment"
-	"github.com/trust-me-im-an-engineer/comments/internal/service/post"
-	subsctiption "github.com/trust-me-im-an-engineer/comments/internal/service/subscription"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/service/comment"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/service/post"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/service/subscription"
 )
 
 // This file will not be regenerated automatically.
@@ -13,10 +13,10 @@ import (
 type Resolver struct {
 	postService         *post.Service
 	commentService      *comment.Service
-	subscriptionService *subsctiption.Service
+	subscriptionService *subscription.Service
 }
 
-func NewResolver(post *post.Service, comment *comment.Service, subsctiption *subsctiption.Service) *Resolver {
+func NewResolver(post *post.Service, comment *comment.Service, subsctiption *subscription.Service) *Resolver {
 	return &Resolver{
 		postService:         post,
 		commentService:      comment,

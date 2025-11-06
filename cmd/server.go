@@ -10,7 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/trust-me-im-an-engineer/comments/graph"
+	"github.com/trust-me-im-an-engineer/mini-reddit/graph"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/trust-me-im-an-engineer/comments/internal/cursorcoder"
-	"github.com/trust-me-im-an-engineer/comments/internal/domain"
-	"github.com/trust-me-im-an-engineer/comments/internal/errs"
-	"github.com/trust-me-im-an-engineer/comments/internal/storage"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/cursorcoder"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/errs"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
 )
 
 type Service struct {

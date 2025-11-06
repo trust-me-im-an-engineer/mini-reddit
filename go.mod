@@ -1,4 +1,4 @@
-module github.com/trust-me-im-an-engineer/comments
+module github.com/trust-me-im-an-engineer/mini-reddit
 
 go 1.24.9
 

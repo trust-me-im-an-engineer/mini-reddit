@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/trust-me-im-an-engineer/comments/graph/model"
-	"github.com/trust-me-im-an-engineer/comments/internal/errs"
+	"github.com/trust-me-im-an-engineer/mini-reddit/graph/model"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/errs"
 )
 
 var (
