@@ -7,11 +7,11 @@ import (
 )
 
 type Storage interface {
-	post
-	comment
+	Post
+	Comment
 }
 
-type post interface {
+type Post interface {
 	CreatePost(ctx context.Context, input *domain.CreatePostInput) (*domain.Post, error)
 	GetPost(ctx context.Context, id int) (*domain.Post, error)
 	UpdatePost(ctx context.Context, input *domain.UpdatePostInput) (*domain.Post, error)
@@ -23,7 +23,7 @@ type post interface {
 	GetPostsSortedByTime(ctx context.Context, limit int32, cursor *domain.PostTimeCursor, newFirst bool) (*domain.PostsPage, error)
 }
 
-type comment interface {
+type Comment interface {
 	CreateComment(ctx context.Context, input *domain.CreateCommentInput) (*domain.Comment, error)
 	UpdateCommentIfNotDeleted(ctx context.Context, input *domain.UpdateCommentInput) (*domain.Comment, error)
 	DeleteComment(ctx context.Context, id int) error
