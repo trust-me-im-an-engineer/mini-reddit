@@ -1,4 +1,4 @@
-package cursorcode
+package cursorcoder
 
 import (
 	"encoding/base64"

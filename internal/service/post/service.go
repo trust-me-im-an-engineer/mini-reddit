@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/trust-me-im-an-engineer/comments/internal/cursorcode"
+	"github.com/trust-me-im-an-engineer/comments/internal/cursorcoder"
 	"github.com/trust-me-im-an-engineer/comments/internal/domain"
 	"github.com/trust-me-im-an-engineer/comments/internal/errs"
 	"github.com/trust-me-im-an-engineer/comments/internal/storage"
@@ -23,7 +23,7 @@ func (s *Service) GetPosts(ctx context.Context, q *domain.PostsInput) (*domain.P
 	case domain.SortOrderRating:
 		var cursor *domain.PostRatingCursor
 		if q.Cursor != nil {
-			c, err := cursorcode.DecodeRatingID(*q.Cursor)
+			c, err := cursorcoder.DecodeRatingID(*q.Cursor)
 			if err != nil {
 				return nil, errs.InvalidCursor
 			}
@@ -36,7 +36,7 @@ func (s *Service) GetPosts(ctx context.Context, q *domain.PostsInput) (*domain.P
 		}
 
 		for _, p := range pp.Posts {
-			cursor := cursorcode.EncodeRatingID(p.Rating, p.ID)
+			cursor := cursorcoder.EncodeRatingID(p.Rating, p.ID)
 			edge := &domain.PostEdge{
 				Cursor: &cursor,
 				Post:   p,
@@ -49,7 +49,7 @@ func (s *Service) GetPosts(ctx context.Context, q *domain.PostsInput) (*domain.P
 	case domain.SortOrderNew, domain.SortOrderOld:
 		var cursor *domain.PostTimeCursor
 		if q.Cursor != nil {
-			c, err := cursorcode.DecodeTimeID(*q.Cursor)
+			c, err := cursorcoder.DecodeTimeID(*q.Cursor)
 			if err != nil {
 				return nil, errs.InvalidCursor
 			}
@@ -63,7 +63,7 @@ func (s *Service) GetPosts(ctx context.Context, q *domain.PostsInput) (*domain.P
 		}
 
 		for _, p := range pp.Posts {
-			cursor := cursorcode.EncodeTimeID(p.CreatedAt, p.ID)
+			cursor := cursorcoder.EncodeTimeID(p.CreatedAt, p.ID)
 			edge := &domain.PostEdge{
 				Cursor: &cursor,
 				Post:   p,
@@ -89,9 +89,9 @@ func (s *Service) GetPosts(ctx context.Context, q *domain.PostsInput) (*domain.P
 	last := postsPage.Posts[len(postsPage.Posts)-1]
 	var endCursor string
 	if q.Sort == domain.SortOrderRating {
-		endCursor = cursorcode.EncodeRatingID(last.Rating, last.ID)
+		endCursor = cursorcoder.EncodeRatingID(last.Rating, last.ID)
 	} else {
-		endCursor = cursorcode.EncodeTimeID(last.CreatedAt, last.ID)
+		endCursor = cursorcoder.EncodeTimeID(last.CreatedAt, last.ID)
 	}
 	connection.PageInfo.EndCursor = &endCursor
 
