@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -31,6 +30,9 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePos
 	domainInput := converter.CreatePostInput_ModelToDomain(&input)
 
 	domainPost, err := r.postService.CreatePost(ctx, domainInput)
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
+	}
 	if err != nil {
 		slog.Error("post service failed to create post", "error", err)
 		return nil, errs.InternalServer
@@ -48,8 +50,8 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePos
 	domainInput := converter.UpdatePost_ModelToDomain(&input)
 
 	domainPost, err := r.postService.UpdatePost(ctx, domainInput)
-	if errors.Is(err, errs.PostNotFound) {
-		return nil, errs.PostNotFound
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("post service failed to update post", "error", err)
@@ -67,8 +69,8 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, err
 	}
 
 	err = r.postService.DeletePost(ctx, domainID)
-	if errors.Is(err, errs.PostNotFound) {
-		return false, errs.PostNotFound
+	if err := errs.Exposable(err); err != nil {
+		return false, err
 	}
 	if err != nil {
 		slog.Error("post service failed to delete post", "id", domainID, "error", err)
@@ -86,8 +88,8 @@ func (r *mutationResolver) SetCommentsRestricted(ctx context.Context, postID str
 	}
 
 	domainPost, err := r.postService.SetCommentsRestricted(ctx, domainID, restricted)
-	if errors.Is(err, errs.PostNotFound) {
-		return nil, errs.PostNotFound
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("post service failed to set comments restricted", "id", domainID, "error", err)
@@ -106,8 +108,8 @@ func (r *mutationResolver) VotePost(ctx context.Context, input model.VoteInput) 
 	domainInput := converter.ModelVoteInputToDomainPostVote(&input)
 
 	domainPost, err := r.postService.VotePost(ctx, domainInput)
-	if errors.Is(err, errs.PostNotFound) {
-		return nil, errs.PostNotFound
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("post service failed to downvote post", "error", err)
@@ -126,8 +128,8 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.Create
 	domainInput := converter.CreateCommentInput_ModelToDomain(&input)
 
 	domainComment, err := r.commentService.CreateComment(ctx, domainInput)
-	if errors.Is(err, errs.ParentCommentDeleted) {
-		return nil, errs.ParentCommentDeleted
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("comment service failed to create comment", "error", err)
@@ -150,11 +152,8 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input model.Update
 	domainInput := converter.UpdateCommentInput_ModelToDomain(&input)
 
 	domainComment, err := r.commentService.UpdateComment(ctx, domainInput)
-	if errors.Is(err, errs.CommentNotFound) {
-		return nil, errs.CommentNotFound
-	}
-	if errors.Is(err, errs.CommentDeleted) {
-		return nil, errs.CommentDeleted
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("comment service failed to update comment", "error", err)
@@ -172,11 +171,8 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (bool, 
 	}
 
 	err = r.commentService.DeleteComment(ctx, domainID)
-	if errors.Is(err, errs.CommentNotFound) {
-		return false, errs.CommentNotFound
-	}
-	if errors.Is(err, errs.CommentDeleted) {
-		return false, errs.CommentDeleted
+	if err := errs.Exposable(err); err != nil {
+		return false, err
 	}
 	if err != nil {
 		slog.Error("comment service failed to delete comment", "id", domainID, "error", err)
@@ -195,11 +191,8 @@ func (r *mutationResolver) VoteComment(ctx context.Context, input model.VoteInpu
 	domainInput := converter.ModelVoteInputToDomainCommentVote(&input)
 
 	domainComment, err := r.commentService.VoteComment(ctx, domainInput)
-	if errors.Is(err, errs.CommentNotFound) {
-		return nil, errs.CommentNotFound
-	}
-	if errors.Is(err, errs.CommentDeleted) {
-		return nil, errs.CommentDeleted
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("comment service failed to downvote comment", "error", err)
@@ -222,6 +215,9 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 	}
 
 	internalPost, err := r.postService.GetPost(ctx, domainID)
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
+	}
 	if err != nil {
 		slog.Error("post service failed to get post", "id", domainID, "error", err)
 		return nil, errs.InternalServer
@@ -239,8 +235,8 @@ func (r *queryResolver) Posts(ctx context.Context, sort model.SortOrder, limit i
 	domainInput := converter.PostsInput(sort, limit, cursor)
 
 	domainPostConnection, err := r.postService.GetPosts(ctx, domainInput)
-	if errors.Is(err, errs.InvalidCursor) {
-		return nil, errs.InvalidCursor
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("post service failed to get posts", "sort", domainInput.Sort, "limit", domainInput.Limit, "cursor", cursor, "error", err)
@@ -258,8 +254,8 @@ func (r *queryResolver) Comment(ctx context.Context, id string) (*model.Comment,
 	}
 
 	internalComment, err := r.commentService.GetComment(ctx, domainID)
-	if errors.Is(err, errs.CommentNotFound) {
-		return nil, errs.CommentNotFound
+	if err := errs.Exposable(err); err != nil {
+		return nil, err
 	}
 	if err != nil {
 		slog.Error("comment service failed to get comment", "id", domainID, "error", err)

@@ -1,3 +1,4 @@
+// errs contains exposable errors that can be showed to user and helper methods for them
 package errs
 
 import (
@@ -15,6 +16,25 @@ var (
 	InternalServer       = errors.New("internal server error")
 )
 
+var all = []error{
+	PostNotFound,
+	CommentNotFound,
+	InvalidID,
+	CommentDeleted,
+	ParentCommentDeleted,
+	InvalidCursor,
+	InternalServer,
+}
+
 func InvalidInputWrap(err error) error {
 	return fmt.Errorf("Invalid input: %w", err)
+}
+
+func Exposable(err error) error {
+	for _, e := range all {
+		if errors.Is(err, e) {
+			return e
+		}
+	}
+	return nil
 }
