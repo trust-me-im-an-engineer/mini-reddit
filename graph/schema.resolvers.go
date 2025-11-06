@@ -25,7 +25,7 @@ func (r *commentResolver) Children(ctx context.Context, obj *model.Comment, sort
 // CreatePost is the resolver for the createPost field.
 func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePostInput) (*model.Post, error) {
 	if err := validator.ValidateCreatePostInput(input); err != nil {
-		return nil, invalidInputWrap(err)
+		return nil, errs.InvalidInputWrap(err)
 	}
 
 	domainInput := converter.CreatePostInput_ModelToDomain(&input)
@@ -33,7 +33,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePos
 	domainPost, err := r.postService.CreatePost(ctx, domainInput)
 	if err != nil {
 		slog.Error("post service failed to create post", "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Post_DomainToModel(domainPost), nil
@@ -42,7 +42,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.CreatePos
 // UpdatePost is the resolver for the updatePost field.
 func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePostInput) (*model.Post, error) {
 	if err := validator.ValidateUpdatePostInput(input); err != nil {
-		return nil, invalidInputWrap(err)
+		return nil, errs.InvalidInputWrap(err)
 	}
 
 	domainInput := converter.UpdatePost_ModelToDomain(&input)
@@ -53,7 +53,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePos
 	}
 	if err != nil {
 		slog.Error("post service failed to update post", "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Post_DomainToModel(domainPost), nil
@@ -63,7 +63,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePos
 func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return false, invalidInputWrap(errs.InvalidID)
+		return false, errs.InvalidInputWrap(errs.InvalidID)
 	}
 
 	err = r.postService.DeletePost(ctx, domainID)
@@ -72,7 +72,7 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, err
 	}
 	if err != nil {
 		slog.Error("post service failed to delete post", "id", domainID, "error", err)
-		return false, InternalServerErr
+		return false, errs.InternalServer
 	}
 
 	return true, nil
@@ -82,7 +82,7 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, err
 func (r *mutationResolver) SetCommentsRestricted(ctx context.Context, postID string, restricted bool) (*model.Post, error) {
 	domainID, err := strconv.Atoi(postID)
 	if err != nil {
-		return nil, invalidInputWrap(fmt.Errorf("invalid post id: %w", err))
+		return nil, errs.InvalidInputWrap(fmt.Errorf("invalid post id: %w", err))
 	}
 
 	domainPost, err := r.postService.SetCommentsRestricted(ctx, domainID, restricted)
@@ -91,7 +91,7 @@ func (r *mutationResolver) SetCommentsRestricted(ctx context.Context, postID str
 	}
 	if err != nil {
 		slog.Error("post service failed to set comments restricted", "id", domainID, "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Post_DomainToModel(domainPost), nil
@@ -100,7 +100,7 @@ func (r *mutationResolver) SetCommentsRestricted(ctx context.Context, postID str
 // VotePost is the resolver for the votePost field.
 func (r *mutationResolver) VotePost(ctx context.Context, input model.VoteInput) (*model.Post, error) {
 	if err := validator.ValidateVoteInput(input); err != nil {
-		return nil, invalidInputWrap(err)
+		return nil, errs.InvalidInputWrap(err)
 	}
 
 	domainInput := converter.ModelVoteInputToDomainPostVote(&input)
@@ -111,7 +111,7 @@ func (r *mutationResolver) VotePost(ctx context.Context, input model.VoteInput) 
 	}
 	if err != nil {
 		slog.Error("post service failed to downvote post", "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Post_DomainToModel(domainPost), nil
@@ -120,7 +120,7 @@ func (r *mutationResolver) VotePost(ctx context.Context, input model.VoteInput) 
 // CreateComment is the resolver for the createComment field.
 func (r *mutationResolver) CreateComment(ctx context.Context, input model.CreateCommentInput) (*model.Comment, error) {
 	if err := validator.ValidateCreateCommentInput(input); err != nil {
-		return nil, invalidInputWrap(err)
+		return nil, errs.InvalidInputWrap(err)
 	}
 
 	domainInput := converter.CreateCommentInput_ModelToDomain(&input)
@@ -131,7 +131,7 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.Create
 	}
 	if err != nil {
 		slog.Error("comment service failed to create comment", "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	modelComment := converter.Comment_DomainToModel(domainComment)
@@ -144,7 +144,7 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.Create
 // UpdateComment is the resolver for the updateComment field.
 func (r *mutationResolver) UpdateComment(ctx context.Context, input model.UpdateCommentInput) (*model.Comment, error) {
 	if err := validator.ValidateUpdateCommentInput(input); err != nil {
-		return nil, invalidInputWrap(err)
+		return nil, errs.InvalidInputWrap(err)
 	}
 
 	domainInput := converter.UpdateCommentInput_ModelToDomain(&input)
@@ -158,7 +158,7 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input model.Update
 	}
 	if err != nil {
 		slog.Error("comment service failed to update comment", "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Comment_DomainToModel(domainComment), nil
@@ -168,7 +168,7 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input model.Update
 func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (bool, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return false, invalidInputWrap(errs.InvalidID)
+		return false, errs.InvalidInputWrap(errs.InvalidID)
 	}
 
 	err = r.commentService.DeleteComment(ctx, domainID)
@@ -180,7 +180,7 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (bool, 
 	}
 	if err != nil {
 		slog.Error("comment service failed to delete comment", "id", domainID, "error", err)
-		return false, InternalServerErr
+		return false, errs.InternalServer
 	}
 
 	return true, nil
@@ -189,7 +189,7 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, id string) (bool, 
 // VoteComment is the resolver for the voteComment field.
 func (r *mutationResolver) VoteComment(ctx context.Context, input model.VoteInput) (*model.Comment, error) {
 	if err := validator.ValidateVoteInput(input); err != nil {
-		return nil, invalidInputWrap(err)
+		return nil, errs.InvalidInputWrap(err)
 	}
 
 	domainInput := converter.ModelVoteInputToDomainCommentVote(&input)
@@ -203,7 +203,7 @@ func (r *mutationResolver) VoteComment(ctx context.Context, input model.VoteInpu
 	}
 	if err != nil {
 		slog.Error("comment service failed to downvote comment", "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Comment_DomainToModel(domainComment), nil
@@ -218,13 +218,13 @@ func (r *postResolver) Comments(ctx context.Context, obj *model.Post, sort model
 func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, invalidInputWrap(errs.InvalidID)
+		return nil, errs.InvalidInputWrap(errs.InvalidID)
 	}
 
 	internalPost, err := r.postService.GetPost(ctx, domainID)
 	if err != nil {
 		slog.Error("post service failed to get post", "id", domainID, "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Post_DomainToModel(internalPost), nil
@@ -233,7 +233,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 // Posts is the resolver for the posts field.
 func (r *queryResolver) Posts(ctx context.Context, sort model.SortOrder, limit int32, cursor *string) (*model.PostConnection, error) {
 	if err := validator.ValidatePostsInput(sort, limit, cursor); err != nil {
-		return nil, invalidInputWrap(err)
+		return nil, errs.InvalidInputWrap(err)
 	}
 
 	domainInput := converter.PostsInput(sort, limit, cursor)
@@ -244,7 +244,7 @@ func (r *queryResolver) Posts(ctx context.Context, sort model.SortOrder, limit i
 	}
 	if err != nil {
 		slog.Error("post service failed to get posts", "sort", domainInput.Sort, "limit", domainInput.Limit, "cursor", cursor, "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.PostConnection_DomainToModel(domainPostConnection), nil
@@ -254,7 +254,7 @@ func (r *queryResolver) Posts(ctx context.Context, sort model.SortOrder, limit i
 func (r *queryResolver) Comment(ctx context.Context, id string) (*model.Comment, error) {
 	domainID, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, invalidInputWrap(errs.InvalidID)
+		return nil, errs.InvalidInputWrap(errs.InvalidID)
 	}
 
 	internalComment, err := r.commentService.GetComment(ctx, domainID)
@@ -263,7 +263,7 @@ func (r *queryResolver) Comment(ctx context.Context, id string) (*model.Comment,
 	}
 	if err != nil {
 		slog.Error("comment service failed to get comment", "id", domainID, "error", err)
-		return nil, InternalServerErr
+		return nil, errs.InternalServer
 	}
 
 	return converter.Comment_DomainToModel(internalComment), nil
@@ -273,7 +273,7 @@ func (r *queryResolver) Comment(ctx context.Context, id string) (*model.Comment,
 func (r *subscriptionResolver) NewComment(ctx context.Context, postID string) (<-chan *model.Comment, error) {
 	domainPostID, err := strconv.Atoi(postID)
 	if err != nil {
-		return nil, invalidInputWrap(errs.InvalidID)
+		return nil, errs.InvalidInputWrap(errs.InvalidID)
 	}
 
 	ch := make(chan *model.Comment, 10)
@@ -308,9 +308,3 @@ type mutationResolver struct{ *Resolver }
 type postResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
-
-var InternalServerErr = errors.New("internal server error")
-
-func invalidInputWrap(err error) error {
-	return fmt.Errorf("Invalid input: %w", err)
-}

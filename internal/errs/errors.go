@@ -2,6 +2,7 @@ package errs
 
 import (
 	"errors"
+	"fmt"
 )
 
 var (
@@ -11,4 +12,9 @@ var (
 	CommentDeleted       = errors.New("comment is deleted")
 	ParentCommentDeleted = errors.New("cannot reply to deleted comment")
 	InvalidCursor        = errors.New("invalid cursor")
+	InternalServer       = errors.New("internal server error")
 )
+
+func InvalidInputWrap(err error) error {
+	return fmt.Errorf("Invalid input: %w", err)
+}
