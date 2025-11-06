@@ -7,6 +7,11 @@ import (
 )
 
 type Storage interface {
+	post
+	comment
+}
+
+type post interface {
 	CreatePost(ctx context.Context, input *domain.CreatePostInput) (*domain.Post, error)
 	GetPost(ctx context.Context, id int) (*domain.Post, error)
 	UpdatePost(ctx context.Context, input *domain.UpdatePostInput) (*domain.Post, error)
@@ -16,7 +21,9 @@ type Storage interface {
 
 	GetPostsSortedByRating(ctx context.Context, limit int32, cursor *domain.PostRatingCursor) (*domain.PostsPage, error)
 	GetPostsSortedByTime(ctx context.Context, limit int32, cursor *domain.PostTimeCursor, newFirst bool) (*domain.PostsPage, error)
+}
 
+type comment interface {
 	CreateComment(ctx context.Context, input *domain.CreateCommentInput) (*domain.Comment, error)
 	UpdateCommentIfNotDeleted(ctx context.Context, input *domain.UpdateCommentInput) (*domain.Comment, error)
 	DeleteComment(ctx context.Context, id int) error
