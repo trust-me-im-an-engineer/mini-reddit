@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"log/slog"
 	"net/http"
@@ -16,7 +17,9 @@ import (
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/service/comment"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/service/post"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/service/subscription"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage/inmemory"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage/postgres"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -37,7 +40,16 @@ func main() {
 		slog.Info("set json logging to stdout", "level", cfg.LogLevel)
 	}
 
-	storage := inmemory.New()
+	var storage storage.Storage
+	if cfg.StorageType == "POSTGRES" {
+		storage, err = postgres.New(context.Background(), *cfg.DB)
+		if err != nil {
+			slog.Error("failed to initialize postgres storage: %w", err)
+			os.Exit(1)
+		}
+	} else {
+		storage = inmemory.New()
+	}
 
 	resolver := graph.NewResolver(
 		post.NewService(storage),
