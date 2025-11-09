@@ -45,7 +45,7 @@ func main() {
 		subscription.NewService(),
 	)
 
-	// Start server``
+	// Start server
 	{
 		srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
