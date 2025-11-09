@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"errors" // Added errors package for http.ErrServerClosed check
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
-	"os/signal" // Import for signal handling
-	"syscall"   // Import for signal handling
+	"os/signal"
+	"syscall"
 
-	// Import for context timeout
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -34,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Logging
+	// --- Logging ---
 	{
 		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: cfg.LogLevel,
