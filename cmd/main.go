@@ -53,18 +53,21 @@ func main() {
 		srv.AddTransport(transport.GET{})
 		srv.AddTransport(transport.POST{})
 
-		srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+		srv.SetQueryCache(lru.New[*ast.QueryDocument](cfg.Grqaphql.QueryCache))
 
 		srv.Use(extension.Introspection{})
 		srv.Use(extension.AutomaticPersistedQuery{
-			Cache: lru.New[string](100),
+			Cache: lru.New[string](cfg.Grqaphql.AutomaticPersistedQuery),
 		})
 
-		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		http.Handle("/query", srv)
-
 		slog.Info("server running", "address", cfg.Address)
-		slog.Info("playground running", "address", cfg.Address)
+
+		if cfg.Grqaphql.Playground {
+			http.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
+			slog.Info("playground running", "address", cfg.Address)
+		}
+
 		log.Fatal(http.ListenAndServe(cfg.Address, nil))
 	}
 }

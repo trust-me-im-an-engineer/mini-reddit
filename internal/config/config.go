@@ -11,7 +11,14 @@ type Config struct {
 	LogLevel    slog.Level `env:"APP_LOG_LEVEL" envDefault:"INFO"`
 	Address     string     `env:"APP_ADDRESS" envDefault:"0.0.0.0:8080"`
 	StorageType string     `env:"STORAGE_TYPE" envDefault:"INMEMORY"`
+	Grqaphql    QraphqlConfig
 	DB          *DBConfig
+}
+
+type QraphqlConfig struct {
+	QueryCache              int  `env:"GRAPHQL_QUERY_CACHE"`
+	AutomaticPersistedQuery int  `env:"GRAPHQL_AUTOMATIC_PERSISTED_QUERY"`
+	Playground              bool `env:"GRAPHQL_PLAYGROUND"`
 }
 
 type DBConfig struct {
