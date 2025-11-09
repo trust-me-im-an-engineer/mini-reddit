@@ -13,11 +13,11 @@ import (
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
 )
 
-var _ storage.Storage = (*InMemory)(nil)
+var _ storage.Storage = (*Storage)(nil)
 
-// InMemory implements storage.Storage with an in-memory map.
+// Storage implements storage.Storage with an in-memory map.
 // It uses a sync.RWMutex to ensure concurrent access safety.
-type InMemory struct {
+type Storage struct {
 	posts        map[int]*domain.Post
 	comments     map[int]*domain.Comment
 	postVotes    map[int]map[uuid.UUID]*domain.PostVote    // PostID -> VoterID -> Vote
@@ -30,8 +30,8 @@ type InMemory struct {
 	nextCommentID int
 }
 
-func New() *InMemory {
-	return &InMemory{
+func New() *Storage {
+	return &Storage{
 		posts:         make(map[int]*domain.Post),
 		comments:      make(map[int]*domain.Comment),
 		postVotes:     make(map[int]map[uuid.UUID]*domain.PostVote),
@@ -43,7 +43,7 @@ func New() *InMemory {
 
 // --- Post Methods ---
 
-func (s *InMemory) CreatePost(ctx context.Context, input *domain.CreatePostInput) (*domain.Post, error) {
+func (s *Storage) CreatePost(ctx context.Context, input *domain.CreatePostInput) (*domain.Post, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -64,7 +64,7 @@ func (s *InMemory) CreatePost(ctx context.Context, input *domain.CreatePostInput
 	return post, nil
 }
 
-func (s *InMemory) GetPost(ctx context.Context, id int) (*domain.Post, error) {
+func (s *Storage) GetPost(ctx context.Context, id int) (*domain.Post, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -77,7 +77,7 @@ func (s *InMemory) GetPost(ctx context.Context, id int) (*domain.Post, error) {
 	return &postCopy, nil
 }
 
-func (s *InMemory) UpdatePost(ctx context.Context, input *domain.UpdatePostInput) (*domain.Post, error) {
+func (s *Storage) UpdatePost(ctx context.Context, input *domain.UpdatePostInput) (*domain.Post, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -97,7 +97,7 @@ func (s *InMemory) UpdatePost(ctx context.Context, input *domain.UpdatePostInput
 	return &postCopy, nil
 }
 
-func (s *InMemory) DeletePost(ctx context.Context, id int) error {
+func (s *Storage) DeletePost(ctx context.Context, id int) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -111,7 +111,7 @@ func (s *InMemory) DeletePost(ctx context.Context, id int) error {
 	return nil
 }
 
-func (s *InMemory) SetCommentsRestricted(ctx context.Context, id int, restricted bool) (*domain.Post, error) {
+func (s *Storage) SetCommentsRestricted(ctx context.Context, id int, restricted bool) (*domain.Post, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -124,7 +124,7 @@ func (s *InMemory) SetCommentsRestricted(ctx context.Context, id int, restricted
 	return &postCopy, nil
 }
 
-func (s *InMemory) VotePost(ctx context.Context, vote *domain.PostVote) (*domain.Post, error) {
+func (s *Storage) VotePost(ctx context.Context, vote *domain.PostVote) (*domain.Post, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -162,7 +162,7 @@ func (s *InMemory) VotePost(ctx context.Context, vote *domain.PostVote) (*domain
 	return &postCopy, nil
 }
 
-func (s *InMemory) GetPostsSortedByRating(ctx context.Context, limit int32, cursor *domain.PostRatingCursor) (*domain.PostsPage, error) {
+func (s *Storage) GetPostsSortedByRating(ctx context.Context, limit int32, cursor *domain.PostRatingCursor) (*domain.PostsPage, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -205,7 +205,7 @@ func (s *InMemory) GetPostsSortedByRating(ctx context.Context, limit int32, curs
 	}, nil
 }
 
-func (s *InMemory) GetPostsSortedByTime(ctx context.Context, limit int32, cursor *domain.PostTimeCursor, newFirst bool) (*domain.PostsPage, error) {
+func (s *Storage) GetPostsSortedByTime(ctx context.Context, limit int32, cursor *domain.PostTimeCursor, newFirst bool) (*domain.PostsPage, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -258,7 +258,7 @@ func (s *InMemory) GetPostsSortedByTime(ctx context.Context, limit int32, cursor
 
 // --- Comment Methods ---
 
-func (s *InMemory) CreateComment(ctx context.Context, input *domain.CreateCommentInput) (*domain.Comment, error) {
+func (s *Storage) CreateComment(ctx context.Context, input *domain.CreateCommentInput) (*domain.Comment, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -301,7 +301,7 @@ func (s *InMemory) CreateComment(ctx context.Context, input *domain.CreateCommen
 	return comment, nil
 }
 
-func (s *InMemory) UpdateCommentIfNotDeleted(ctx context.Context, input *domain.UpdateCommentInput) (*domain.Comment, error) {
+func (s *Storage) UpdateCommentIfNotDeleted(ctx context.Context, input *domain.UpdateCommentInput) (*domain.Comment, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -319,7 +319,7 @@ func (s *InMemory) UpdateCommentIfNotDeleted(ctx context.Context, input *domain.
 	return &commentCopy, nil
 }
 
-func (s *InMemory) DeleteComment(ctx context.Context, id int) error {
+func (s *Storage) DeleteComment(ctx context.Context, id int) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -342,7 +342,7 @@ func (s *InMemory) DeleteComment(ctx context.Context, id int) error {
 	return nil
 }
 
-func (s *InMemory) VoteCommentIfNotDeleted(ctx context.Context, vote *domain.CommentVote) (*domain.Comment, error) {
+func (s *Storage) VoteCommentIfNotDeleted(ctx context.Context, vote *domain.CommentVote) (*domain.Comment, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -381,7 +381,7 @@ func (s *InMemory) VoteCommentIfNotDeleted(ctx context.Context, vote *domain.Com
 	return &commentCopy, nil
 }
 
-func (s *InMemory) GetComment(ctx context.Context, id int) (*domain.Comment, error) {
+func (s *Storage) GetComment(ctx context.Context, id int) (*domain.Comment, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -392,3 +392,5 @@ func (s *InMemory) GetComment(ctx context.Context, id int) (*domain.Comment, err
 	commentCopy := *comment
 	return &commentCopy, nil
 }
+
+func (s *Storage) Close() {}

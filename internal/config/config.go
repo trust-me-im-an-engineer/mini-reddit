@@ -3,30 +3,32 @@ package config
 import (
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/caarlos0/env/v6"
 )
 
 type Config struct {
-	LogLevel    slog.Level `env:"APP_LOG_LEVEL" envDefault:"INFO"`
-	Address     string     `env:"APP_ADDRESS" envDefault:"0.0.0.0:8080"`
-	StorageType string     `env:"STORAGE_TYPE" envDefault:"INMEMORY"`
-	Grqaphql    QraphqlConfig
-	DB          *DBConfig
+	LogLevel        slog.Level    `env:"APP_LOG_LEVEL"`
+	Address         string        `env:"APP_ADDRESS,required"`
+	StorageType     string        `env:"STORAGE_TYPE,required"`
+	ShutdownTimeout time.Duration `env:"SHUTDOWN_TIMEOUT,required"`
+	Grqaphql        QraphqlConfig
+	DB              *DBConfig
 }
 
 type QraphqlConfig struct {
-	QueryCache              int  `env:"GRAPHQL_QUERY_CACHE"`
-	AutomaticPersistedQuery int  `env:"GRAPHQL_AUTOMATIC_PERSISTED_QUERY"`
-	Playground              bool `env:"GRAPHQL_PLAYGROUND"`
+	QueryCache              int  `env:"GRAPHQL_QUERY_CACHE,required"`
+	AutomaticPersistedQuery int  `env:"GRAPHQL_AUTOMATIC_PERSISTED_QUERY,required"`
+	Playground              bool `env:"GRAPHQL_PLAYGROUND,required"`
 }
 
 type DBConfig struct {
-	Host string `env:"DB_HOST"`
-	Port int    `env:"DB_PORT"`
-	User string `env:"DB_USER"`
-	Pass string `env:"DB_PASSWORD"`
-	Name string `env:"DB_NAME"`
+	Host string `env:"DB_HOST,required"`
+	Port int    `env:"DB_PORT,required"`
+	User string `env:"DB_USER,required"`
+	Pass string `env:"DB_PASSWORD,required"`
+	Name string `env:"DB_NAME,required"`
 }
 
 func Load() (Config, error) {

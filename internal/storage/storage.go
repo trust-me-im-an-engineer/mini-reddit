@@ -9,6 +9,7 @@ import (
 type Storage interface {
 	Post
 	Comment
+	Close()
 }
 
 type Post interface {
