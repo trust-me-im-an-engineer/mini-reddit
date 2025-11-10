@@ -2,117 +2,117 @@ scalar Time
 scalar UUID
 
 enum SortOrder {
-  RATING
-  NEW
-  OLD
+    RATING
+    NEW
+    OLD
 }
 
 type PageInfo {
-  hasNextPage: Boolean!
-  endCursor: String
+    hasNextPage: Boolean!
+    endCursor: String
 }
 
 type PostEdge {
-  cursor: String!
-  node: Post!
+    cursor: String!
+    node: Post!
 }
 
 type PostConnection {
-  edges: [PostEdge!]!
-  pageInfo: PageInfo!
+    edges: [PostEdge!]!
+    pageInfo: PageInfo!
 }
 
 type Post {
-  id: ID!
-  authorID: UUID!
-  title: String!
-  content: String!
-  createdAt: Time!
-  rating: Int!
-  commentsCount: Int!
-  commentsRestricted: Boolean!
-  comments(sort: SortOrder! = RATING, limit: Int! = 6, cursor: String, depth: Int! = 2): CommentConnection!  @goField(forceResolver: true)
+    id: ID!
+    authorID: UUID!
+    title: String!
+    content: String!
+    createdAt: Time!
+    rating: Int!
+    commentsCount: Int!
+    commentsRestricted: Boolean!
+    comments(sort: SortOrder! = RATING, limit: Int! = 6, cursor: String, depth: Int! = 2): CommentConnection!  @goField(forceResolver: true)
 }
 
 input CreatePostInput {
-  authorID: UUID!
-  title: String!
-  content: String!
+    authorID: UUID!
+    title: String!
+    content: String!
 }
 
 input UpdatePostInput {
-  id: ID!
-  title: String
-  content: String
+    id: ID!
+    title: String
+    content: String
 }
 
 type CommentEdge {
-  cursor: String!
-  node: Comment!
+    cursor: String!
+    node: Comment!
 }
 
 type CommentConnection {
-  edges: [CommentEdge!]!
-  pageInfo: PageInfo!
+    edges: [CommentEdge!]!
+    pageInfo: PageInfo!
 }
 
 type Comment {
-  id: ID!
-  postID: ID!
-  authorID: UUID!
-  text: String!
-  createdAt: Time!
-  rating: Int!
-  deleted: Boolean!
-  parentID: ID
-  children(sort: SortOrder! = RATING, limit: Int! = 6, cursor: String, depth: Int! = 2): CommentConnection! @goField(forceResolver: true)
-  parentTree(depth: Int = 1): [Comment!]!
+    id: ID!
+    postID: ID!
+    authorID: UUID!
+    text: String!
+    createdAt: Time!
+    rating: Int!
+    deleted: Boolean!
+    parentID: ID
+    children(sort: SortOrder! = RATING, limit: Int! = 6, cursor: String, depth: Int! = 2): CommentConnection! @goField(forceResolver: true)
+    parentTree(depth: Int = 1): [Comment!]!
 }
 
 input CreateCommentInput {
-  postID: ID!
-  authorID: UUID!
-  text: String!
-  parentID: ID
+    postID: ID!
+    authorID: UUID!
+    text: String!
+    parentID: ID
 }
 
 input UpdateCommentInput {
-  id: ID!
-  text: String!
+    id: ID!
+    text: String!
 }
 
 input VoteInput {
-  id: ID!
-  voterID: UUID!
-  value: Int!
+    id: ID!
+    voterID: UUID!
+    value: Int!
 }
 
 type Mutation {
-  createPost(input: CreatePostInput!): Post!
-  updatePost(input: UpdatePostInput!): Post!
-  deletePost(id: ID!): Boolean!
-  setCommentsRestricted(postID: ID!, restricted: Boolean!): Post!
+    createPost(input: CreatePostInput!): Post!
+    updatePost(input: UpdatePostInput!): Post!
+    deletePost(id: ID!): Boolean!
+    setCommentsRestricted(postID: ID!, restricted: Boolean!): Post!
 
-  votePost(input: VoteInput!): Post!
+    votePost(input: VoteInput!): Post!
 
-  createComment(input: CreateCommentInput!): Comment!
-  updateComment(input: UpdateCommentInput!): Comment!
-  deleteComment(id: ID!): Boolean!
+    createComment(input: CreateCommentInput!): Comment!
+    updateComment(input: UpdateCommentInput!): Comment!
+    deleteComment(id: ID!): Boolean!
 
-  voteComment(input: VoteInput!): Comment!
+    voteComment(input: VoteInput!): Comment!
 }
 
 
 type Query {
-  post(id: ID!): Post
-  posts(sort: SortOrder! = NEW, limit: Int! = 10, cursor: String): PostConnection!
-  comment(id: ID!): Comment
+    post(id: ID!): Post
+    posts(sort: SortOrder! = NEW, limit: Int! = 10, cursor: String): PostConnection!
+    comment(id: ID!): Comment
 }
 
 type Subscription {
-  newComment(postID: ID!): Comment!
+    newComment(postID: ID!): Comment!
 }
 
 directive @goField(
-  forceResolver: Boolean
+    forceResolver: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
