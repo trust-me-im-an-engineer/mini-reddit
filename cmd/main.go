@@ -14,6 +14,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/trust-me-im-an-engineer/mini-reddit/graph"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/config"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/service/comment"
@@ -22,7 +24,6 @@ import (
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage/inmemory"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage/postgres"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 func main() {

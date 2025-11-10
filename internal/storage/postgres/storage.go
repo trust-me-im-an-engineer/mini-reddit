@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/config"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
@@ -43,7 +44,6 @@ func (s *Storage) Close() {
 	}
 }
 
-// CreateComment implements storage.Storage.
 func (s *Storage) CreateComment(ctx context.Context, input *domain.CreateCommentInput) (*domain.Comment, error) {
 	panic("unimplemented")
 }
