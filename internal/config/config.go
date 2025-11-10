@@ -13,7 +13,7 @@ type Config struct {
 	Address         string        `env:"APP_ADDRESS,required"`
 	StorageType     string        `env:"STORAGE_TYPE,required"`
 	ShutdownTimeout time.Duration `env:"SHUTDOWN_TIMEOUT,required"`
-	Grqaphql        QraphqlConfig
+	Graphql         QraphqlConfig
 	DB              *DBConfig
 }
 

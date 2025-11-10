@@ -73,16 +73,16 @@ func main() {
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
-	srv.SetQueryCache(lru.New[*ast.QueryDocument](cfg.Grqaphql.QueryCache))
+	srv.SetQueryCache(lru.New[*ast.QueryDocument](cfg.Graphql.QueryCache))
 	srv.Use(extension.Introspection{})
 	srv.Use(extension.AutomaticPersistedQuery{
-		Cache: lru.New[string](cfg.Grqaphql.AutomaticPersistedQuery),
+		Cache: lru.New[string](cfg.Graphql.AutomaticPersistedQuery),
 	})
 
 	router := http.NewServeMux()
 	router.Handle("/query", srv)
 
-	if cfg.Grqaphql.Playground {
+	if cfg.Graphql.Playground {
 		router.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
 		slog.Info("playground running", "address", cfg.Address)
 	}
