@@ -1,4 +1,4 @@
-// package model contains internal model representation different from graph/model
+// Package domain contains internal data representation different from graph/model
 package domain
 
 import (
