@@ -36,10 +36,10 @@ func main() {
 
 	// --- Logging ---
 	{
-		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: cfg.LogLevel,
 		})
-		slog.SetDefault(slog.New(handler))
+		slog.SetDefault(slog.New(jsonHandler))
 		slog.Info("set json logging to stdout", "level", cfg.LogLevel)
 	}
 
