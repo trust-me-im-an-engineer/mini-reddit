@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS comment_votes
     CHECK (value IN (1, -1))
 );
 
+
 CREATE OR REPLACE FUNCTION check_post_comments_restriction()
     RETURNS TRIGGER AS
 $$
@@ -67,6 +68,7 @@ CREATE TRIGGER enforce_comment_restriction_trigger
     ON comments
     FOR EACH ROW
 EXECUTE FUNCTION check_post_comments_restriction();
+
 
 CREATE OR REPLACE FUNCTION check_parent_comment_deletion()
     RETURNS TRIGGER AS
@@ -100,18 +102,13 @@ CREATE TRIGGER enforce_parent_deletion_trigger
     FOR EACH ROW
 EXECUTE FUNCTION check_parent_comment_deletion();
 
+
 CREATE INDEX posts_rating_id_idx ON posts (rating DESC, id ASC);
-
 CREATE INDEX posts_created_at_desc_id_idx ON posts (created_at DESC, id ASC);
-
 CREATE INDEX posts_created_at_asc_id_idx ON posts (created_at ASC, id ASC);
 
 CREATE INDEX comments_post_id_rating_id_idx ON comments (post_id, rating DESC, id ASC);
-
 CREATE INDEX comments_post_id_created_at_desc_id_idx ON comments (post_id, created_at DESC, id ASC);
-
 CREATE INDEX comments_post_id_created_at_asc_id_idx ON comments (post_id DESC, created_at ASC, id ASC);
-
 CREATE INDEX comments_post_id_idx ON comments (post_id);
-
 CREATE INDEX comments_parent_id_idx ON comments (parent_id);
