@@ -1,4 +1,4 @@
-// errs contains exposable errors that can be showed to user and helper methods for them
+// Package errs contains exposable errors that can be shown to user and helper methods for them
 package errs
 
 import (
