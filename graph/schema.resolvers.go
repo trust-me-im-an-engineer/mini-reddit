@@ -228,7 +228,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 
 // Posts is the resolver for the posts field.
 func (r *queryResolver) Posts(ctx context.Context, sort model.SortOrder, limit int32, cursor *string) (*model.PostConnection, error) {
-	if err := validator.ValidatePostsInput(sort, limit, cursor); err != nil {
+	if err := validator.ValidatePostsInput(limit); err != nil {
 		return nil, errs.InvalidInputWrap(err)
 	}
 

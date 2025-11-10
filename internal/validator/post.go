@@ -52,7 +52,7 @@ func ValidateUpdatePostInput(in model.UpdatePostInput) error {
 	return nil
 }
 
-func ValidatePostsInput(sort model.SortOrder, limit int32, cursor *string) error {
+func ValidatePostsInput(limit int32) error {
 	if limit < 0 {
 		return NegativeLimit
 	}
