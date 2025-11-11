@@ -83,9 +83,16 @@ func (s *Storage) CreateComment(ctx context.Context, input *domain.CreateComment
 	return &comment, nil
 }
 
-// CreatePost implements storage.Storage.
 func (s *Storage) CreatePost(ctx context.Context, input *domain.CreatePostInput) (*domain.Post, error) {
-	panic("unimplemented")
+	q := `INSERT INTO posts (author_id, title, content) 
+		  VALUES ($1, $2, $3) RETURNING *`
+	rows, _ := s.pool.Query(ctx, q, input.AuthorID, input.Title, input.Content)
+	post, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.Post])
+	if err != nil {
+		return nil, err
+	}
+
+	return &post, nil
 }
 
 // DeleteComment implements storage.Storage.
