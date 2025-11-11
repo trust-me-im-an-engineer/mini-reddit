@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -56,9 +57,9 @@ func (s *Storage) Close() {
 func (s *Storage) CreateComment(ctx context.Context, input *domain.CreateCommentInput) (*domain.Comment, error) {
 	q := `INSERT INTO comments (post_id, author_id, text, parent_id)  
 		  VALUES ($1, $2, $3, $4) RETURNING *`
-	row := s.pool.QueryRow(ctx, q, input.PostID, input.AuthorID, input.Text, input.ParentID)
-	comment := &domain.Comment{}
-	if err := row.Scan(comment); err != nil {
+	rows, _ := s.pool.Query(ctx, q, input.PostID, input.AuthorID, input.Text, input.ParentID)
+	comment, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.Comment])
+	if err != nil {
 		var pgxError *pgconn.PgError
 		if !errors.As(err, &pgxError) {
 			return nil, err
@@ -79,7 +80,7 @@ func (s *Storage) CreateComment(ctx context.Context, input *domain.CreateComment
 		}
 	}
 
-	return comment, nil
+	return &comment, nil
 }
 
 // CreatePost implements storage.Storage.
