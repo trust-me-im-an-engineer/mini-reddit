@@ -13,6 +13,7 @@ type Comment struct {
 	Text      *string   `db:"text"`
 	CreatedAt time.Time `db:"created_at"`
 	Rating    int32     `db:"rating"`
+	Deleted   bool      `db:"deleted"`
 	ParentID  *int      `db:"parent_id"`
 }
 
