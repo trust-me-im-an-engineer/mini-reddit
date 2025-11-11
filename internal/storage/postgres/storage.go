@@ -17,9 +17,12 @@ import (
 )
 
 const (
+	notFound            = "02000"
 	foreignKeyViolation = "23503"
-	commentsRestricted  = "90001"
-	replyToDeleted      = "90002"
+	uniqueViolation     = "23505"
+
+	commentsRestricted = "90001"
+	replyToDeleted     = "90002"
 )
 
 var _ storage.Storage = (*Storage)(nil)
@@ -95,9 +98,18 @@ func (s *Storage) CreatePost(ctx context.Context, input *domain.CreatePostInput)
 	return &post, nil
 }
 
-// DeleteComment implements storage.Storage.
 func (s *Storage) DeleteComment(ctx context.Context, id int) error {
-	panic("unimplemented")
+	q := `UPDATE comments 
+		  SET deleted = TRUE
+		  WHERE id = $1`
+	commandTag, err := s.pool.Exec(ctx, q, id)
+	if err != nil {
+		return err
+	}
+	if commandTag.RowsAffected() == 0 {
+		return errs.CommentNotFound
+	}
+	return nil
 }
 
 // DeletePost implements storage.Storage.
