@@ -112,9 +112,17 @@ func (s *Storage) DeleteComment(ctx context.Context, id int) error {
 	return nil
 }
 
-// DeletePost implements storage.Storage.
 func (s *Storage) DeletePost(ctx context.Context, id int) error {
-	panic("unimplemented")
+	q := `DELETE FROM posts 
+		  WHERE id = $1`
+	commandTag, err := s.pool.Exec(ctx, q, id)
+	if err != nil {
+		return err
+	}
+	if commandTag.RowsAffected() == 0 {
+		return errs.PostNotFound
+	}
+	return nil
 }
 
 // GetComment implements storage.Storage.
