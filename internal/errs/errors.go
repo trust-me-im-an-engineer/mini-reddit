@@ -13,7 +13,7 @@ var (
 	CommentsRestricted    = errors.New("comments disabled for this post")
 	InvalidID             = errors.New("id must be valid integer")
 	CommentDeleted        = errors.New("comment is deleted")
-	ParentCommentDeleted  = errors.New("cannot reply to deleted comment")
+	ReplyToDeletedComment = errors.New("cannot reply to deleted comment")
 	InvalidCursor         = errors.New("invalid cursor")
 	InternalServer        = errors.New("internal server error")
 )
@@ -25,7 +25,7 @@ var all = []error{
 	CommentsRestricted,
 	InvalidID,
 	CommentDeleted,
-	ParentCommentDeleted,
+	ReplyToDeletedComment,
 	InvalidCursor,
 	InternalServer,
 }

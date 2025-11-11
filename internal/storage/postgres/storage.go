@@ -2,14 +2,23 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/config"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/domain"
+	"github.com/trust-me-im-an-engineer/mini-reddit/internal/errs"
 	"github.com/trust-me-im-an-engineer/mini-reddit/internal/storage"
+)
+
+const (
+	foreignKeyViolation = "23503"
+	commentsRestricted  = "90001"
+	replyToDeleted      = "90002"
 )
 
 var _ storage.Storage = (*Storage)(nil)
@@ -45,7 +54,32 @@ func (s *Storage) Close() {
 }
 
 func (s *Storage) CreateComment(ctx context.Context, input *domain.CreateCommentInput) (*domain.Comment, error) {
-	panic("unimplemented")
+	q := `INSERT INTO comments (post_id, author_id, text, parent_id)  
+		  VALUES ($1, $2, $3, $4) RETURNING *`
+	row := s.pool.QueryRow(ctx, q, input.PostID, input.AuthorID, input.Text, input.ParentID)
+	comment := &domain.Comment{}
+	if err := row.Scan(comment); err != nil {
+		var pgxError *pgconn.PgError
+		if !errors.As(err, &pgxError) {
+			return nil, err
+		}
+
+		switch pgxError.Code {
+		case foreignKeyViolation:
+			switch pgxError.ConstraintName {
+			case "comments_post_id_fkey":
+				return nil, errs.PostNotFound
+			case "comments_parent_id_fkey":
+				return nil, errs.ParentCommentNotFound
+			}
+		case commentsRestricted:
+			return nil, errs.CommentsRestricted
+		case replyToDeleted:
+			return nil, errs.ReplyToDeletedComment
+		}
+	}
+
+	return comment, nil
 }
 
 // CreatePost implements storage.Storage.

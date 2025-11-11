@@ -278,7 +278,7 @@ func (s *Storage) CreateComment(ctx context.Context, input *domain.CreateComment
 			return nil, errs.CommentNotFound // Parent comment not found (uses the generic CommentNotFound)
 		}
 		if parentComment.Text == nil {
-			return nil, errs.ParentCommentDeleted // Updated
+			return nil, errs.ReplyToDeletedComment // Updated
 		}
 	}
 
