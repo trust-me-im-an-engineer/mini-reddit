@@ -125,9 +125,18 @@ func (s *Storage) DeletePost(ctx context.Context, id int) error {
 	return nil
 }
 
-// GetComment implements storage.Storage.
 func (s *Storage) GetComment(ctx context.Context, id int) (*domain.Comment, error) {
-	panic("unimplemented")
+	q := `SELECT * FROM comments
+		  WHERE id = $1`
+	rows, _ := s.pool.Query(ctx, q, id)
+	comment, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domain.Comment])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errs.CommentNotFound
+		}
+		return nil, err
+	}
+	return &comment, nil
 }
 
 // GetPost implements storage.Storage.
